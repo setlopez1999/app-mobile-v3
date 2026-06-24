@@ -1,4 +1,5 @@
 class Dispositivo {
+  final String id;
   final String mac;
   final String nombre;
   final String ipLocal;
@@ -6,6 +7,7 @@ class Dispositivo {
   final bool conectado;
 
   const Dispositivo({
+    required this.id,
     required this.mac,
     required this.nombre,
     required this.ipLocal,
@@ -14,6 +16,7 @@ class Dispositivo {
   });
 
   factory Dispositivo.fromJson(Map<String, dynamic> json) => Dispositivo(
+        id: json['id'] as String,
         mac: json['mac'] as String,
         nombre: json['nombre'] as String,
         ipLocal: json['ip_local'] as String,
@@ -22,6 +25,7 @@ class Dispositivo {
       );
 
   Map<String, dynamic> toJson() => {
+        'id': id,
         'mac': mac,
         'nombre': nombre,
         'ip_local': ipLocal,
@@ -30,6 +34,7 @@ class Dispositivo {
       };
 
   Dispositivo copyWith({
+    String? id,
     String? mac,
     String? nombre,
     String? ipLocal,
@@ -37,6 +42,7 @@ class Dispositivo {
     bool? conectado,
   }) =>
       Dispositivo(
+        id: id ?? this.id,
         mac: mac ?? this.mac,
         nombre: nombre ?? this.nombre,
         ipLocal: ipLocal ?? this.ipLocal,

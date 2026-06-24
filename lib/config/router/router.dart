@@ -246,7 +246,10 @@ GoRouter appRouter(AppRouterRef ref) {
       GoRoute(
         path: '/tools/gaming-detail',
         name: 'GamingDetail',
-        builder: (_, __) => const GamingDetailScreen(),
+        builder: (_, state) {
+          final gameId = state.extra as String? ?? '';
+          return GamingDetailScreen(gameId: gameId);
+        },
         pageBuilder: GoTransitions.cupertino.call,
       ),
       GoRoute(
@@ -264,7 +267,10 @@ GoRouter appRouter(AppRouterRef ref) {
       GoRoute(
         path: '/tools/streaming-detail',
         name: 'StreamingDetail',
-        builder: (_, __) => const StreamingDetailScreen(),
+        builder: (_, state) {
+          final platformId = state.extra as String? ?? '';
+          return StreamingDetailScreen(platformId: platformId);
+        },
         pageBuilder: GoTransitions.cupertino.call,
       ),
       GoRoute(

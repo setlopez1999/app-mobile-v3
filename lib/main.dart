@@ -11,6 +11,7 @@ import 'package:tvapp/config/theme/light.theme.dart';
 import 'package:tvapp/firebase_options.dart';
 import 'package:tvapp/providers/connectivity_notifier.state.dart';
 import 'package:tvapp/storage/secure_storage.dart';
+import 'package:tvapp/storage/tools/local_storage.dart';
 import 'package:tvapp/widgets/no_internet_dialog.dart';
 
 import 'config/error_handler/error_handler.dart';
@@ -24,6 +25,7 @@ import 'config/error_handler/error_handler.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load();
+  await LocalStorage.init();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
     name: 'newtvapp'

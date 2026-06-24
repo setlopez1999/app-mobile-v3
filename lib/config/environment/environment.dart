@@ -20,6 +20,9 @@ class Environment {
   static String baseHost = dotenv.env['BASE_HOST']!;
   static String middlewareHost = dotenv.env['MIDDLEWARE_HOST']!;
 
+  /// Tools (Check Health / Diagnóstico) API
+  static String toolsBaseUrl = dotenv.env['TOOLS_BASE_URL'] ?? 'http://serverpruebabryan.com.cd-latam.com';
+
   /// Theme config
   static Color lightThemeColor = HexColor(dotenv.env['LIGHT_THEME_COLOR']!);
   static Color darkThemeColor = HexColor(dotenv.env['DARK_THEME_COLOR']!);

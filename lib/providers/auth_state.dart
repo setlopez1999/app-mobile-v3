@@ -100,8 +100,9 @@ enum AuthState {
     ],
   ),
   authenticated(
-    redirectPath: '/home',
+    redirectPath: '/menu',
     allowedPaths: [
+      '/menu',
       '/home',
       '/notifications',
       '/player',
@@ -114,7 +115,26 @@ enum AuthState {
       '/channel-details',
       '/search',
       '/tv-guide',
-      '/search-favorites'
+      '/search-favorites',
+      // Tools (Check Health)
+      '/tools',
+      '/tools/check-health',
+      '/tools/diagnostico',
+      '/tools/diagnostico-result',
+      '/tools/gaming',
+      '/tools/gaming-detail',
+      '/tools/gaming-streaming',
+      '/tools/streaming',
+      '/tools/streaming-detail',
+      '/tools/chat',
+      '/tools/dispositivos',
+      '/tools/offline',
+      '/tools/offline-result',
+      '/tools/asistencia',
+      '/tools/asistencia-loading',
+      '/tools/asistencia-problem',
+      '/tools/asistencia-success',
+      '/tools/historial',
     ],
   );
 

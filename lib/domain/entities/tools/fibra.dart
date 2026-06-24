@@ -1,15 +1,26 @@
-import 'package:freezed_annotation/freezed_annotation.dart';
-
-part 'fibra.freezed.dart';
-part 'fibra.g.dart';
-
 /// [estado] puede ser: "OK" | "FALLA" | "DEGRADADO"
-@freezed
-class Fibra with _$Fibra {
-  const factory Fibra({
-    required String potenciaDbm,
-    required String estado,
-  }) = _Fibra;
+class Fibra {
+  final String potenciaDbm;
+  final String estado;
 
-  factory Fibra.fromJson(Map<String, dynamic> json) => _$FibraFromJson(json);
+  const Fibra({
+    required this.potenciaDbm,
+    required this.estado,
+  });
+
+  factory Fibra.fromJson(Map<String, dynamic> json) => Fibra(
+        potenciaDbm: json['potencia_dbm'] as String,
+        estado: json['estado'] as String,
+      );
+
+  Map<String, dynamic> toJson() => {
+        'potencia_dbm': potenciaDbm,
+        'estado': estado,
+      };
+
+  Fibra copyWith({String? potenciaDbm, String? estado}) =>
+      Fibra(
+        potenciaDbm: potenciaDbm ?? this.potenciaDbm,
+        estado: estado ?? this.estado,
+      );
 }

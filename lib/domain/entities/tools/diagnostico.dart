@@ -1,45 +1,95 @@
-import 'package:freezed_annotation/freezed_annotation.dart';
+class Diagnostico {
+  final String id;
+  final DateTime fecha;
+  final int latenciaIspMs;
+  final double velocidadBajadaMbps;
+  final String resultado;
 
-part 'diagnostico.freezed.dart';
-part 'diagnostico.g.dart';
+  const Diagnostico({
+    required this.id,
+    required this.fecha,
+    required this.latenciaIspMs,
+    required this.velocidadBajadaMbps,
+    required this.resultado,
+  });
 
-@freezed
-class Diagnostico with _$Diagnostico {
-  const factory Diagnostico({
-    required String id,
-    required DateTime fecha,
-    required int latenciaIspMs,
-    required double velocidadBajadaMbps,
-    required String resultado,
-  }) = _Diagnostico;
+  factory Diagnostico.fromJson(Map<String, dynamic> json) => Diagnostico(
+        id: json['id'] as String,
+        fecha: DateTime.parse(json['fecha'] as String),
+        latenciaIspMs: (json['latencia_isp_ms'] as num).toInt(),
+        velocidadBajadaMbps: (json['velocidad_bajada_mbps'] as num).toDouble(),
+        resultado: json['resultado'] as String,
+      );
 
-  factory Diagnostico.fromJson(Map<String, dynamic> json) => _$DiagnosticoFromJson(json);
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'fecha': fecha.toIso8601String(),
+        'latencia_isp_ms': latenciaIspMs,
+        'velocidad_bajada_mbps': velocidadBajadaMbps,
+        'resultado': resultado,
+      };
+
+  Diagnostico copyWith({
+    String? id,
+    DateTime? fecha,
+    int? latenciaIspMs,
+    double? velocidadBajadaMbps,
+    String? resultado,
+  }) =>
+      Diagnostico(
+        id: id ?? this.id,
+        fecha: fecha ?? this.fecha,
+        latenciaIspMs: latenciaIspMs ?? this.latenciaIspMs,
+        velocidadBajadaMbps: velocidadBajadaMbps ?? this.velocidadBajadaMbps,
+        resultado: resultado ?? this.resultado,
+      );
 }
 
-@freezed
-class DiagnosticoRequest with _$DiagnosticoRequest {
-  const factory DiagnosticoRequest({
-    required String clienteId,
-    required int latenciaGoogleMs,
-    required int latenciaIspMs,
-    required double velocidadBajadaMbps,
-    required double velocidadSubidaMbps,
-    required String fibraPotenciaDbm,
-    required String fibraEstado,
-  }) = _DiagnosticoRequest;
+class DiagnosticoRequest {
+  final String clienteId;
+  final int latenciaGoogleMs;
+  final int latenciaIspMs;
+  final double velocidadBajadaMbps;
+  final double velocidadSubidaMbps;
+  final String fibraPotenciaDbm;
+  final String fibraEstado;
 
-  factory DiagnosticoRequest.fromJson(Map<String, dynamic> json) =>
-      _$DiagnosticoRequestFromJson(json);
+  const DiagnosticoRequest({
+    required this.clienteId,
+    required this.latenciaGoogleMs,
+    required this.latenciaIspMs,
+    required this.velocidadBajadaMbps,
+    required this.velocidadSubidaMbps,
+    required this.fibraPotenciaDbm,
+    required this.fibraEstado,
+  });
+
+  Map<String, dynamic> toJson() => {
+        'cliente_id': clienteId,
+        'latencia_google_ms': latenciaGoogleMs,
+        'latencia_isp_ms': latenciaIspMs,
+        'velocidad_bajada_mbps': velocidadBajadaMbps,
+        'velocidad_subida_mbps': velocidadSubidaMbps,
+        'fibra_potencia_dbm': fibraPotenciaDbm,
+        'fibra_estado': fibraEstado,
+      };
 }
 
-@freezed
-class DiagnosticoSaveResult with _$DiagnosticoSaveResult {
-  const factory DiagnosticoSaveResult({
-    required bool success,
-    required String diagnosticoId,
-    required String resultado,
-  }) = _DiagnosticoSaveResult;
+class DiagnosticoSaveResult {
+  final bool success;
+  final String diagnosticoId;
+  final String resultado;
+
+  const DiagnosticoSaveResult({
+    required this.success,
+    required this.diagnosticoId,
+    required this.resultado,
+  });
 
   factory DiagnosticoSaveResult.fromJson(Map<String, dynamic> json) =>
-      _$DiagnosticoSaveResultFromJson(json);
+      DiagnosticoSaveResult(
+        success: json['success'] as bool,
+        diagnosticoId: json['diagnostico_id'] as String,
+        resultado: json['resultado'] as String,
+      );
 }

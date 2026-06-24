@@ -1,17 +1,46 @@
-import 'package:freezed_annotation/freezed_annotation.dart';
+class User {
+  final String clienteId;
+  final String nombre;
+  final String planContratado;
+  final String email;
+  final String telefono;
 
-part 'user.freezed.dart';
-part 'user.g.dart';
+  const User({
+    required this.clienteId,
+    required this.nombre,
+    required this.planContratado,
+    required this.email,
+    required this.telefono,
+  });
 
-@freezed
-class User with _$User {
-  const factory User({
-    required String clienteId,
-    required String nombre,
-    required String planContratado,
-    required String email,
-    required String telefono,
-  }) = _User;
+  factory User.fromJson(Map<String, dynamic> json) => User(
+        clienteId: json['cliente_id'] as String,
+        nombre: json['nombre'] as String,
+        planContratado: json['plan_contratado'] as String,
+        email: json['email'] as String,
+        telefono: json['telefono'] as String,
+      );
 
-  factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
+  Map<String, dynamic> toJson() => {
+        'cliente_id': clienteId,
+        'nombre': nombre,
+        'plan_contratado': planContratado,
+        'email': email,
+        'telefono': telefono,
+      };
+
+  User copyWith({
+    String? clienteId,
+    String? nombre,
+    String? planContratado,
+    String? email,
+    String? telefono,
+  }) =>
+      User(
+        clienteId: clienteId ?? this.clienteId,
+        nombre: nombre ?? this.nombre,
+        planContratado: planContratado ?? this.planContratado,
+        email: email ?? this.email,
+        telefono: telefono ?? this.telefono,
+      );
 }

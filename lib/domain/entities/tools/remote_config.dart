@@ -1,31 +1,44 @@
-import 'package:freezed_annotation/freezed_annotation.dart';
+/// IPs de destino para los pings nativos del diagnostico.
+class NetworkTargets {
+  final String googlePingTarget;
+  final String ispPingTarget;
 
-part 'remote_config.freezed.dart';
-part 'remote_config.g.dart';
+  const NetworkTargets({
+    required this.googlePingTarget,
+    required this.ispPingTarget,
+  });
 
-/// IPs de destino para los pings nativos del diagnóstico.
-@freezed
-class NetworkTargets with _$NetworkTargets {
-  const factory NetworkTargets({
-    required String googlePingTarget,
-    required String ispPingTarget,
-  }) = _NetworkTargets;
+  factory NetworkTargets.fromJson(Map<String, dynamic> json) => NetworkTargets(
+        googlePingTarget: json['google_ping_target'] as String,
+        ispPingTarget: json['isp_ping_target'] as String,
+      );
 
-  factory NetworkTargets.fromJson(Map<String, dynamic> json) =>
-      _$NetworkTargetsFromJson(json);
+  Map<String, dynamic> toJson() => {
+        'google_ping_target': googlePingTarget,
+        'isp_ping_target': ispPingTarget,
+      };
 }
 
-/// Configuración global de la app obtenida del backend.
-/// Fuente: GET /v1/config  (CONFIG-1)
-@freezed
-class AppRemoteConfig with _$AppRemoteConfig {
-  const factory AppRemoteConfig({
-    required String assetsVersion,
-    required String assetsCdnUrl,
-    required Map<String, String> icons,
-    required NetworkTargets networkTargets,
-  }) = _AppRemoteConfig;
+/// Configuracion global de la app obtenida del backend.
+class AppRemoteConfig {
+  final String assetsVersion;
+  final String assetsCdnUrl;
+  final Map<String, String> icons;
+  final NetworkTargets networkTargets;
+
+  const AppRemoteConfig({
+    required this.assetsVersion,
+    required this.assetsCdnUrl,
+    required this.icons,
+    required this.networkTargets,
+  });
 
   factory AppRemoteConfig.fromJson(Map<String, dynamic> json) =>
-      _$AppRemoteConfigFromJson(json);
+      AppRemoteConfig(
+        assetsVersion: json['assets_version'] as String,
+        assetsCdnUrl: json['assets_cdn_url'] as String,
+        icons: Map<String, String>.from(json['icons'] as Map),
+        networkTargets: NetworkTargets.fromJson(
+            json['network_targets'] as Map<String, dynamic>),
+      );
 }

@@ -5,7 +5,7 @@ buildscript {
     }
     dependencies {
         // Especifica el plugin de Gradle para Android. Puedes usar la versión 8.0.0 o superior para Android 14.
-        classpath 'com.android.tools.build:gradle:8.9.0'
+        classpath 'com.android.tools.build:gradle:8.9.1'
     }
 }
 

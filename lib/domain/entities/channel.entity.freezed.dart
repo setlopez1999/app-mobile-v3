@@ -40,8 +40,12 @@ mixin _$Channel {
   bool get isFavorite => throw _privateConstructorUsedError;
   String? get streamLink => throw _privateConstructorUsedError;
 
+  /// Serializes this Channel to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-  @JsonKey(ignore: true)
+
+  /// Create a copy of Channel
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   $ChannelCopyWith<Channel> get copyWith => throw _privateConstructorUsedError;
 }
 
@@ -77,6 +81,8 @@ class _$ChannelCopyWithImpl<$Res, $Val extends Channel>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
+  /// Create a copy of Channel
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -188,6 +194,8 @@ class __$$ChannelImplCopyWithImpl<$Res>
       _$ChannelImpl _value, $Res Function(_$ChannelImpl) _then)
       : super(_value, _then);
 
+  /// Create a copy of Channel
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -364,7 +372,7 @@ class _$ChannelImpl implements _Channel {
                 other.streamLink == streamLink));
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
       runtimeType,
@@ -383,7 +391,9 @@ class _$ChannelImpl implements _Channel {
       isFavorite,
       streamLink);
 
-  @JsonKey(ignore: true)
+  /// Create a copy of Channel
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$ChannelImplCopyWith<_$ChannelImpl> get copyWith =>
@@ -451,8 +461,11 @@ abstract class _Channel implements Channel {
   bool get isFavorite;
   @override
   String? get streamLink;
+
+  /// Create a copy of Channel
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$ChannelImplCopyWith<_$ChannelImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

@@ -30,7 +30,7 @@ class ChangePasswordScreen extends StatelessWidget {
             const SizedBox(height: 15),
             const _PasswordField(label: 'Repetir nueva contraseña'),
             const Spacer(),
-            _SubmitButton(onTap: () => context.push('/check_health/change_password/success')),
+            _SubmitButton(onTap: () => context.push('/tools/change-password-success')),
             const SizedBox(height: 40),
           ],
         ),

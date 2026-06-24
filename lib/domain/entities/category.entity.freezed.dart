@@ -33,8 +33,12 @@ mixin _$CategoryEntity {
   int get ott => throw _privateConstructorUsedError;
   String get predefinido => throw _privateConstructorUsedError;
 
+  /// Serializes this CategoryEntity to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-  @JsonKey(ignore: true)
+
+  /// Create a copy of CategoryEntity
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   $CategoryEntityCopyWith<CategoryEntity> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -68,6 +72,8 @@ class _$CategoryEntityCopyWithImpl<$Res, $Val extends CategoryEntity>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
+  /// Create a copy of CategoryEntity
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -156,6 +162,8 @@ class __$$CategoryEntityImplCopyWithImpl<$Res>
       _$CategoryEntityImpl _value, $Res Function(_$CategoryEntityImpl) _then)
       : super(_value, _then);
 
+  /// Create a copy of CategoryEntity
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -281,12 +289,14 @@ class _$CategoryEntityImpl implements _CategoryEntity {
                 other.predefinido == predefinido));
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(runtimeType, adulto, background, card,
       cardIos, especial, icono, id, name, ott, predefinido);
 
-  @JsonKey(ignore: true)
+  /// Create a copy of CategoryEntity
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$CategoryEntityImplCopyWith<_$CategoryEntityImpl> get copyWith =>
@@ -339,8 +349,11 @@ abstract class _CategoryEntity implements CategoryEntity {
   int get ott;
   @override
   String get predefinido;
+
+  /// Create a copy of CategoryEntity
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$CategoryEntityImplCopyWith<_$CategoryEntityImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

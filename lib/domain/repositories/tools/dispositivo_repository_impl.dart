@@ -12,7 +12,7 @@ class DispositivoRepositoryImpl implements DispositivoRepository {
     final data = await _api.get('/v1/dispositivos');
     final list = data['dispositivos'] as List<dynamic>;
     return list
-        .map<Dispositivo>((e) => Dispositivo(
+        .map((e) => Dispositivo(
               id: e['id'] as String,
               nombre: e['nombre'] as String,
               mac: e['mac'] as String,
@@ -20,6 +20,7 @@ class DispositivoRepositoryImpl implements DispositivoRepository {
               tipo: e['tipo'] as String,
               conectado: e['conectado'] as bool,
             ))
+        .cast<Dispositivo>()
         .toList();
   }
 }

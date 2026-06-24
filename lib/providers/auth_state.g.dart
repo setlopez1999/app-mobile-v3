@@ -6,7 +6,7 @@ part of 'auth_state.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$currentAuthStateHash() => r'59a84cd253de48849e9ad9264caa05eab6664414';
+String _$currentAuthStateHash() => r'ab938a56a63930d3d7fe75e6b7e0e1282896d406';
 
 /// See also [CurrentAuthState].
 @ProviderFor(CurrentAuthState)
@@ -23,4 +23,4 @@ final currentAuthStateProvider =
 
 typedef _$CurrentAuthState = AutoDisposeNotifier<AuthState>;
 // ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member
+// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

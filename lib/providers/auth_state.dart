@@ -72,11 +72,15 @@ class CurrentAuthState extends _$CurrentAuthState {
   Future<void> logout() async {
     final prefs = await _prefs;
     final secureStorage = await ref.read(secureStorageProvider.future);
+    final token = secureStorage.get('token');
+    if (token != null) {
+      await repository.desvincule(token);
+    }
     await prefs.remove('email');
     await prefs.remove('deviceID');
-    await repository.desvincule(secureStorage.get('token')!);
     await secureStorage.remove('token');
     await secureStorage.remove('parental');
+    await secureStorage.remove('email');
     state = AuthState.unauthenticated;
   }
 }
@@ -117,7 +121,6 @@ enum AuthState {
       '/tv-guide',
       '/search-favorites',
       // Tools (Check Health)
-      '/tools',
       '/tools/check-health',
       '/tools/diagnostico',
       '/tools/diagnostico-result',
@@ -135,6 +138,8 @@ enum AuthState {
       '/tools/asistencia-problem',
       '/tools/asistencia-success',
       '/tools/historial',
+      '/tools/change-password',
+      '/tools/change-password-success',
     ],
   );
 

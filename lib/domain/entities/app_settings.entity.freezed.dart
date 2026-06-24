@@ -24,8 +24,12 @@ mixin _$AppSettingsEntity {
   String get policies => throw _privateConstructorUsedError;
   String get planFreeSelected => throw _privateConstructorUsedError;
 
+  /// Serializes this AppSettingsEntity to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-  @JsonKey(ignore: true)
+
+  /// Create a copy of AppSettingsEntity
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   $AppSettingsEntityCopyWith<AppSettingsEntity> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -49,6 +53,8 @@ class _$AppSettingsEntityCopyWithImpl<$Res, $Val extends AppSettingsEntity>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
+  /// Create a copy of AppSettingsEntity
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -92,6 +98,8 @@ class __$$AppSettingsEntityImplCopyWithImpl<$Res>
       $Res Function(_$AppSettingsEntityImpl) _then)
       : super(_value, _then);
 
+  /// Create a copy of AppSettingsEntity
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -151,12 +159,14 @@ class _$AppSettingsEntityImpl implements _AppSettingsEntity {
                 other.planFreeSelected == planFreeSelected));
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode =>
       Object.hash(runtimeType, terms, policies, planFreeSelected);
 
-  @JsonKey(ignore: true)
+  /// Create a copy of AppSettingsEntity
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$AppSettingsEntityImplCopyWith<_$AppSettingsEntityImpl> get copyWith =>
@@ -186,8 +196,11 @@ abstract class _AppSettingsEntity implements AppSettingsEntity {
   String get policies;
   @override
   String get planFreeSelected;
+
+  /// Create a copy of AppSettingsEntity
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$AppSettingsEntityImplCopyWith<_$AppSettingsEntityImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

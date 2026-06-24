@@ -136,6 +136,9 @@ flutter:
     #
     # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
+dependency_overrides:
+  analyzer_plugin: ^0.13.4
+
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true

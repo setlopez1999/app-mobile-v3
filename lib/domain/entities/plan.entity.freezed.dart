@@ -34,8 +34,12 @@ mixin _$PlanEntity {
   bool get state => throw _privateConstructorUsedError;
   List<ListChannel> get listChannel => throw _privateConstructorUsedError;
 
+  /// Serializes this PlanEntity to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-  @JsonKey(ignore: true)
+
+  /// Create a copy of PlanEntity
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   $PlanEntityCopyWith<PlanEntity> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -68,6 +72,8 @@ class _$PlanEntityCopyWithImpl<$Res, $Val extends PlanEntity>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
+  /// Create a copy of PlanEntity
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -150,6 +156,8 @@ class __$$PlanEntityImplCopyWithImpl<$Res>
       _$PlanEntityImpl _value, $Res Function(_$PlanEntityImpl) _then)
       : super(_value, _then);
 
+  /// Create a copy of PlanEntity
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -277,7 +285,7 @@ class _$PlanEntityImpl implements _PlanEntity {
                 .equals(other._listChannel, _listChannel));
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
       runtimeType,
@@ -291,7 +299,9 @@ class _$PlanEntityImpl implements _PlanEntity {
       state,
       const DeepCollectionEquality().hash(_listChannel));
 
-  @JsonKey(ignore: true)
+  /// Create a copy of PlanEntity
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$PlanEntityImplCopyWith<_$PlanEntityImpl> get copyWith =>
@@ -344,8 +354,11 @@ abstract class _PlanEntity implements PlanEntity {
   bool get state;
   @override
   List<ListChannel> get listChannel;
+
+  /// Create a copy of PlanEntity
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$PlanEntityImplCopyWith<_$PlanEntityImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -359,8 +372,12 @@ mixin _$ListChannel {
   String get nombre => throw _privateConstructorUsedError;
   String get imagen => throw _privateConstructorUsedError;
 
+  /// Serializes this ListChannel to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-  @JsonKey(ignore: true)
+
+  /// Create a copy of ListChannel
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   $ListChannelCopyWith<ListChannel> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -384,6 +401,8 @@ class _$ListChannelCopyWithImpl<$Res, $Val extends ListChannel>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
+  /// Create a copy of ListChannel
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -422,6 +441,8 @@ class __$$ListChannelImplCopyWithImpl<$Res>
       _$ListChannelImpl _value, $Res Function(_$ListChannelImpl) _then)
       : super(_value, _then);
 
+  /// Create a copy of ListChannel
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -468,11 +489,13 @@ class _$ListChannelImpl implements _ListChannel {
             (identical(other.imagen, imagen) || other.imagen == imagen));
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(runtimeType, nombre, imagen);
 
-  @JsonKey(ignore: true)
+  /// Create a copy of ListChannel
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$ListChannelImplCopyWith<_$ListChannelImpl> get copyWith =>
@@ -498,8 +521,11 @@ abstract class _ListChannel implements ListChannel {
   String get nombre;
   @override
   String get imagen;
+
+  /// Create a copy of ListChannel
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$ListChannelImplCopyWith<_$ListChannelImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

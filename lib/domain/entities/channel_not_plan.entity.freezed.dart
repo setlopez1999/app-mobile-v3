@@ -27,8 +27,12 @@ mixin _$ChannelNotPlan {
   String get title => throw _privateConstructorUsedError;
   bool get isFavorite => throw _privateConstructorUsedError;
 
+  /// Serializes this ChannelNotPlan to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-  @JsonKey(ignore: true)
+
+  /// Create a copy of ChannelNotPlan
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   $ChannelNotPlanCopyWith<ChannelNotPlan> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -58,6 +62,8 @@ class _$ChannelNotPlanCopyWithImpl<$Res, $Val extends ChannelNotPlan>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
+  /// Create a copy of ChannelNotPlan
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -122,6 +128,8 @@ class __$$ChannelNotPlanImplCopyWithImpl<$Res>
       _$ChannelNotPlanImpl _value, $Res Function(_$ChannelNotPlanImpl) _then)
       : super(_value, _then);
 
+  /// Create a copy of ChannelNotPlan
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -208,12 +216,14 @@ class _$ChannelNotPlanImpl implements _ChannelNotPlan {
                 other.isFavorite == isFavorite));
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
       runtimeType, card, description, number, studio, title, isFavorite);
 
-  @JsonKey(ignore: true)
+  /// Create a copy of ChannelNotPlan
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$ChannelNotPlanImplCopyWith<_$ChannelNotPlanImpl> get copyWith =>
@@ -252,8 +262,11 @@ abstract class _ChannelNotPlan implements ChannelNotPlan {
   String get title;
   @override
   bool get isFavorite;
+
+  /// Create a copy of ChannelNotPlan
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$ChannelNotPlanImplCopyWith<_$ChannelNotPlanImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

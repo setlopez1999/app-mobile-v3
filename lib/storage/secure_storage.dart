@@ -1,5 +1,5 @@
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 part 'secure_storage.g.dart';
 
@@ -9,34 +9,35 @@ Future<SecureStorage> secureStorage(SecureStorageRef ref) async {
 }
 
 class SecureStorage {
-  SecureStorage._(this._prefs, this._cache);
+  SecureStorage._(this._storage, this._cache);
 
-  final SharedPreferences _prefs;
+  final FlutterSecureStorage _storage;
   final Map<String, String> _cache;
 
   static Future<SecureStorage> getInstance({required Set<String> keys}) async {
-    final prefs = await SharedPreferences.getInstance();
+    const storage = FlutterSecureStorage(
+      aOptions: AndroidOptions(encryptedSharedPreferences: true),
+      iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock),
+    );
     final cache = <String, String>{};
-
     for (final key in keys) {
-      final value = prefs.getString(key);
+      final value = await storage.read(key: key);
       if (value != null) {
         cache[key] = value;
       }
     }
-
-    return SecureStorage._(prefs, cache);
+    return SecureStorage._(storage, cache);
   }
 
   String? get(String key) => _cache[key];
 
   Future<void> set(String key, String value) async {
     _cache[key] = value;
-    await _prefs.setString(key, value);
+    await _storage.write(key: key, value: value);
   }
 
   Future<void> remove(String key) async {
     _cache.remove(key);
-    await _prefs.remove(key);
+    await _storage.delete(key: key);
   }
 }

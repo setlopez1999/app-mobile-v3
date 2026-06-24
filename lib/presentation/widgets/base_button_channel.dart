@@ -52,7 +52,8 @@ class BaseButtonChannel extends ConsumerWidget {
           }
 
           final secureStorage = ref.read(secureStorageProvider).requireValue;
-          final token = secureStorage.get('token')!;
+          final token = secureStorage.get('token');
+          if (token == null) return;
           final channelLive = await ChannelsRepository().getChannelWithStream(
             token,
             channel: channel,
@@ -83,7 +84,6 @@ class BaseButtonChannel extends ConsumerWidget {
             channel.studio,
             categoryId,
           ); */
-      print('eliminar');
       await ref.read(favoritesChannelsProvider.notifier).deleteFavorite(channel.studio,categoryId,);
     }else{
        await ref.read(channelsProvider.notifier).setFavorite(
@@ -135,8 +135,11 @@ class BaseButtonChannel extends ConsumerWidget {
                     final plainText = adultTextController.text;
                     final secureStorage =
                         ref.read(secureStorageProvider).requireValue;
-                    final parentalToken = secureStorage.get('parental')!;
-
+                    final parentalToken = secureStorage.get('parental');
+                    if (parentalToken == null) {
+                      Navigator.of(context).pop(false);
+                      return;
+                    }
                     final isValid = DBCrypt().checkpw(plainText, parentalToken);
                     Navigator.of(context).pop(isValid);
                   },

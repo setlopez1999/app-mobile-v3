@@ -35,7 +35,7 @@ class AuthRepository {
       if (Platform.isAndroid) {
         final device = await deviceInfoPlugin.androidInfo;
         final androidID = await const AndroidId().getId();
-        id = androidID!.replaceAll('[^a-zA-Z0-9]', '');
+        id = androidID!.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '');
         res = await dio.post<Map<String, dynamic>>(
           '${Environment.baseHost}/api/inicio',
           data: {
@@ -59,7 +59,7 @@ class AuthRepository {
       else {
         final device = await deviceInfoPlugin.iosInfo;
         id = device.identifierForVendor!
-            .replaceAll('[^a-zA-Z0-9]', '')
+            .replaceAll(RegExp(r'[^a-zA-Z0-9]'), '')
             .replaceAll('-', '');
         res = await dio.post<Map<String, dynamic>>(
             '${Environment.baseHost}/api/inicio',
@@ -81,7 +81,7 @@ class AuthRepository {
             )
         );
       }
-      print("id: $id");
+      assert(() { debugPrint('[Auth] device id: $id'); return true; }());
       final data = res.data;
       if (data!['code'] == 200) {
         await reRegisterFCM(email);
@@ -158,7 +158,7 @@ class AuthRepository {
         return Left(data['mensaje']);
       }
 
-      return const Right('Algo salió mal');
+      return const Left('Algo salió mal');
     } catch (e, stackTrace) {
       if (e is DioException) {
         if (e.response != null) {

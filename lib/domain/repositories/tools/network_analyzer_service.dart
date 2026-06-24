@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:async';
 import 'dart:math';
+import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dio/dio.dart';
@@ -47,6 +48,9 @@ class NetworkAnalyzerService {
   }
 
   Future<PingResult> ping(String host, {int count = 4}) async {
+    if (Platform.isAndroid || Platform.isIOS) {
+      return _tcpPing(host, count: count);
+    }
     try {
       final isWindows = Platform.isWindows;
       final args = isWindows
@@ -64,6 +68,54 @@ class NetworkAnalyzerService {
     } catch (e) {
       return PingResult.failure();
     }
+  }
+
+  Future<PingResult> _tcpPing(String host, {int count = 4}) async {
+    final rtts = <double>[];
+    // Use common open ports on public DNS / internet hosts
+    const ports = [53, 443, 80];
+
+    for (int i = 0; i < count; i++) {
+      bool connected = false;
+      for (final port in ports) {
+        try {
+          final sw = Stopwatch()..start();
+          final socket = await Socket.connect(
+            host,
+            port,
+            timeout: const Duration(seconds: 3),
+          );
+          sw.stop();
+          socket.destroy();
+          rtts.add(sw.elapsedMilliseconds.toDouble());
+          connected = true;
+          break;
+        } catch (_) {}
+      }
+      if (!connected) {
+        // Counts as packet loss for this iteration
+      }
+    }
+
+    if (rtts.isEmpty) return PingResult.failure();
+
+    final avgPing = rtts.reduce((a, b) => a + b) / rtts.length;
+    final lossPercent = ((count - rtts.length) / count) * 100;
+
+    double jitter = 0;
+    if (rtts.length > 1) {
+      final variance =
+          rtts.map((x) => pow(x - avgPing, 2)).reduce((a, b) => a + b) /
+              rtts.length;
+      jitter = sqrt(variance);
+    }
+
+    return PingResult(
+      avgPing: avgPing,
+      lossPercent: lossPercent,
+      jitter: jitter,
+      success: true,
+    );
   }
 
   PingResult _parsePingOutput(String output, bool isWindows) {
@@ -203,8 +255,9 @@ class NetworkAnalyzerService {
 
   Future<double> _measureUploadSpeed(String baseUrl) async {
     // Try Cloudflare upload first
+    // Uint8List allocation is native and does not block the UI thread
     const uploadSize = 10 * 1024 * 1024;
-    final data = List<int>.generate(uploadSize, (_) => Random().nextInt(256));
+    final data = Uint8List(uploadSize);
     try {
       final uri = Uri.parse('https://speed.cloudflare.com/__up');
       final stopwatch = Stopwatch()..start();

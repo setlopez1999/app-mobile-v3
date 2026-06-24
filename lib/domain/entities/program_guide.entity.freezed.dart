@@ -32,8 +32,12 @@ mixin _$TvGuideEntity {
   @JsonKey(name: 'category_id')
   int get categoryId => throw _privateConstructorUsedError;
 
+  /// Serializes this TvGuideEntity to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-  @JsonKey(ignore: true)
+
+  /// Create a copy of TvGuideEntity
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   $TvGuideEntityCopyWith<TvGuideEntity> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -66,6 +70,8 @@ class _$TvGuideEntityCopyWithImpl<$Res, $Val extends TvGuideEntity>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
+  /// Create a copy of TvGuideEntity
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -148,6 +154,8 @@ class __$$TvGuideEntityImplCopyWithImpl<$Res>
       _$TvGuideEntityImpl _value, $Res Function(_$TvGuideEntityImpl) _then)
       : super(_value, _then);
 
+  /// Create a copy of TvGuideEntity
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -270,7 +278,7 @@ class _$TvGuideEntityImpl implements _TvGuideEntity {
                 other.categoryId == categoryId));
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
       runtimeType,
@@ -284,7 +292,9 @@ class _$TvGuideEntityImpl implements _TvGuideEntity {
       const DeepCollectionEquality().hash(_epg),
       categoryId);
 
-  @JsonKey(ignore: true)
+  /// Create a copy of TvGuideEntity
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$TvGuideEntityImplCopyWith<_$TvGuideEntityImpl> get copyWith =>
@@ -334,8 +344,11 @@ abstract class _TvGuideEntity implements TvGuideEntity {
   @override
   @JsonKey(name: 'category_id')
   int get categoryId;
+
+  /// Create a copy of TvGuideEntity
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$TvGuideEntityImplCopyWith<_$TvGuideEntityImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

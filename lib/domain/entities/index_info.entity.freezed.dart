@@ -24,8 +24,12 @@ mixin _$IndexInfo {
   String get plan => throw _privateConstructorUsedError;
   String get planId => throw _privateConstructorUsedError;
 
+  /// Serializes this IndexInfo to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-  @JsonKey(ignore: true)
+
+  /// Create a copy of IndexInfo
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   $IndexInfoCopyWith<IndexInfo> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -48,6 +52,8 @@ class _$IndexInfoCopyWithImpl<$Res, $Val extends IndexInfo>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
+  /// Create a copy of IndexInfo
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -91,6 +97,8 @@ class __$$IndexInfoImplCopyWithImpl<$Res>
       _$IndexInfoImpl _value, $Res Function(_$IndexInfoImpl) _then)
       : super(_value, _then);
 
+  /// Create a copy of IndexInfo
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -156,12 +164,14 @@ class _$IndexInfoImpl implements _IndexInfo {
             (identical(other.planId, planId) || other.planId == planId));
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(runtimeType,
       const DeepCollectionEquality().hash(_categories), plan, planId);
 
-  @JsonKey(ignore: true)
+  /// Create a copy of IndexInfo
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$IndexInfoImplCopyWith<_$IndexInfoImpl> get copyWith =>
@@ -190,8 +200,11 @@ abstract class _IndexInfo implements IndexInfo {
   String get plan;
   @override
   String get planId;
+
+  /// Create a copy of IndexInfo
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$IndexInfoImplCopyWith<_$IndexInfoImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

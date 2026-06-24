@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:go_transitions/go_transitions.dart';
@@ -40,6 +41,8 @@ import 'package:tvapp/presentation/screens/tools/asistencia/asistencia_intro_scr
 import 'package:tvapp/presentation/screens/tools/asistencia/asistencia_loading_screen.dart';
 import 'package:tvapp/presentation/screens/tools/asistencia/asistencia_problem_screen.dart';
 import 'package:tvapp/presentation/screens/tools/asistencia/asistencia_success_screen.dart';
+import 'package:tvapp/presentation/screens/tools/change_password/change_password_screen.dart';
+import 'package:tvapp/presentation/screens/tools/change_password/change_password_success_screen.dart';
 import 'package:tvapp/presentation/screens/tools/historial/historial_screen.dart';
 import 'package:tvapp/providers/auth_state.dart';
 
@@ -57,7 +60,7 @@ GoRouter appRouter(AppRouterRef ref) {
 
   return GoRouter(
     navigatorKey: routerKey,
-    debugLogDiagnostics: true,
+    debugLogDiagnostics: kDebugMode,
     initialLocation: '/',
     refreshListenable: authStateNotifier,
     redirect: (_, state) {
@@ -325,6 +328,18 @@ GoRouter appRouter(AppRouterRef ref) {
         path: '/tools/historial',
         name: 'Historial',
         builder: (_, __) => const HistorialScreen(),
+        pageBuilder: GoTransitions.cupertino.call,
+      ),
+      GoRoute(
+        path: '/tools/change-password',
+        name: 'ToolsChangePassword',
+        builder: (_, __) => const ChangePasswordScreen(),
+        pageBuilder: GoTransitions.cupertino.call,
+      ),
+      GoRoute(
+        path: '/tools/change-password-success',
+        name: 'ToolsChangePasswordSuccess',
+        builder: (_, __) => const ChangePasswordSuccessScreen(),
         pageBuilder: GoTransitions.cupertino.call,
       ),
     ],

@@ -47,4 +47,6 @@ app.*.map.json
 /**/*.salive
 
 # FVM — solo el symlink se ignora; .fvmrc y .fvm/fvm_config.json SÍ se trackean
-.fvm/flutter_sdk
+
+# FVM Version Cache
+.fvm/

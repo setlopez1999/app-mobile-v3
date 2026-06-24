@@ -31,8 +31,12 @@ mixin _$EpgEntity {
   String get siguiente => throw _privateConstructorUsedError;
   String get titulo => throw _privateConstructorUsedError;
 
+  /// Serializes this EpgEntity to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-  @JsonKey(ignore: true)
+
+  /// Create a copy of EpgEntity
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   $EpgEntityCopyWith<EpgEntity> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -63,6 +67,8 @@ class _$EpgEntityCopyWithImpl<$Res, $Val extends EpgEntity>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
+  /// Create a copy of EpgEntity
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -139,6 +145,8 @@ class __$$EpgEntityImplCopyWithImpl<$Res>
       _$EpgEntityImpl _value, $Res Function(_$EpgEntityImpl) _then)
       : super(_value, _then);
 
+  /// Create a copy of EpgEntity
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -247,12 +255,14 @@ class _$EpgEntityImpl implements _EpgEntity {
             (identical(other.titulo, titulo) || other.titulo == titulo));
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(runtimeType, anterior, channel, desc,
       fechaFin, fechaIni, run, siguiente, titulo);
 
-  @JsonKey(ignore: true)
+  /// Create a copy of EpgEntity
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$EpgEntityImplCopyWith<_$EpgEntityImpl> get copyWith =>
@@ -298,8 +308,11 @@ abstract class _EpgEntity implements EpgEntity {
   String get siguiente;
   @override
   String get titulo;
+
+  /// Create a copy of EpgEntity
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$EpgEntityImplCopyWith<_$EpgEntityImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

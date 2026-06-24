@@ -23,8 +23,12 @@ mixin _$LocationEntity {
   String get code => throw _privateConstructorUsedError;
   String get description => throw _privateConstructorUsedError;
 
+  /// Serializes this LocationEntity to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-  @JsonKey(ignore: true)
+
+  /// Create a copy of LocationEntity
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   $LocationEntityCopyWith<LocationEntity> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -48,6 +52,8 @@ class _$LocationEntityCopyWithImpl<$Res, $Val extends LocationEntity>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
+  /// Create a copy of LocationEntity
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -86,6 +92,8 @@ class __$$LocationEntityImplCopyWithImpl<$Res>
       _$LocationEntityImpl _value, $Res Function(_$LocationEntityImpl) _then)
       : super(_value, _then);
 
+  /// Create a copy of LocationEntity
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -133,11 +141,13 @@ class _$LocationEntityImpl implements _LocationEntity {
                 other.description == description));
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(runtimeType, code, description);
 
-  @JsonKey(ignore: true)
+  /// Create a copy of LocationEntity
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$LocationEntityImplCopyWith<_$LocationEntityImpl> get copyWith =>
@@ -164,8 +174,11 @@ abstract class _LocationEntity implements LocationEntity {
   String get code;
   @override
   String get description;
+
+  /// Create a copy of LocationEntity
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$LocationEntityImplCopyWith<_$LocationEntityImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

@@ -31,7 +31,6 @@ class MenuGridScreen extends ConsumerWidget {
               primaryColor: primaryColor,
               secondaryColor: secondaryColor,
               textColor: textColor,
-              ref: ref,
             ),
             const SizedBox(height: 16),
             Expanded(
@@ -52,21 +51,19 @@ class MenuGridScreen extends ConsumerWidget {
 
 // ─── Header ──────────────────────────────────────────────────────────────────
 
-class _Header extends StatelessWidget {
+class _Header extends ConsumerWidget {
   const _Header({
     required this.primaryColor,
     required this.secondaryColor,
     required this.textColor,
-    required this.ref,
   });
 
   final Color primaryColor;
   final Color secondaryColor;
   final Color textColor;
-  final WidgetRef ref;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),

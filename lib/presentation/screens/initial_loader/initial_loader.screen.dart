@@ -1,0 +1,22 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tvapp/presentation/screens/initial_loader/widgets/body.initial_loader.widget.dart';
+
+/// Initial Loader Screen
+class InitialLoaderScreen extends ConsumerStatefulWidget {
+  const InitialLoaderScreen({super.key});
+
+  static String name = 'Initial Loader Screen';
+
+  @override
+  ConsumerState createState() => _InitialLoaderScreenState();
+}
+
+class _InitialLoaderScreenState extends ConsumerState<InitialLoaderScreen> {
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      body: BodyWidget(),
+    );
+  }
+}

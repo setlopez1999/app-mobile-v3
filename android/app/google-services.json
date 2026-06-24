@@ -1,0 +1,86 @@
+{
+  "project_info": {
+    "project_number": "437006153385",
+    "project_id": "bantel-tv",
+    "storage_bucket": "bantel-tv.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:437006153385:android:32ef65f6c4930cb922dbb8",
+        "android_client_info": {
+          "package_name": "com.bantel.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAlAjrv0QSwsPh2hXn5j-QOoay14wjr5Bc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:437006153385:android:d33c2de99dc589bf22dbb8",
+        "android_client_info": {
+          "package_name": "tv.bantel.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAlAjrv0QSwsPh2hXn5j-QOoay14wjr5Bc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:437006153385:android:a23884ff5076cf0e22dbb8",
+        "android_client_info": {
+          "package_name": "tv.cdlatam.bantel"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAlAjrv0QSwsPh2hXn5j-QOoay14wjr5Bc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:437006153385:android:c94683409008b43022dbb8",
+        "android_client_info": {
+          "package_name": "tv.trapemn.bantel"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAlAjrv0QSwsPh2hXn5j-QOoay14wjr5Bc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

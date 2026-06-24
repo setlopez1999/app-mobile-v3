@@ -1,0 +1,34 @@
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        // Especifica el plugin de Gradle para Android. Puedes usar la versión 8.0.0 o superior para Android 14.
+        classpath 'com.android.tools.build:gradle:8.9.0'
+    }
+}
+
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+rootProject.buildDir = "../build"
+subprojects {
+    project.buildDir = "${rootProject.buildDir}/${project.name}"
+}
+subprojects {
+    project.evaluationDependsOn(":app")
+}
+
+tasks.register("clean", Delete) {
+    delete rootProject.buildDir
+}
+
+ext {
+    kotlin_version = '2.0.20' // Reemplaza con la última versión estable de Kotlin
+}

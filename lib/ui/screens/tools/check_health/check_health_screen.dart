@@ -9,6 +9,14 @@ import 'package:tvapp/core/domain/entities/tools/diagnostico.dart';
 import 'package:tvapp/ui/providers/tools/dispositivos_providers.dart';
 import 'package:tvapp/ui/providers/tools/fibra_providers.dart';
 import 'package:tvapp/ui/providers/tools/diagnostico_providers.dart';
+import 'package:tvapp/ui/screens/change_password/change_password_screen.dart';
+import 'package:tvapp/ui/screens/menu/menu_grid.screen.dart';
+import 'package:tvapp/ui/screens/tools/asistencia/asistencia_loading_screen.dart';
+import 'package:tvapp/ui/screens/tools/chat/chat_screen.dart';
+import 'package:tvapp/ui/screens/tools/diagnostico/diagnostico_screen.dart';
+import 'package:tvapp/ui/screens/tools/dispositivos/devices_screen.dart';
+import 'package:tvapp/ui/screens/tools/gaming/gaming_screen.dart';
+import 'package:tvapp/ui/screens/tools/offline/offline_screen.dart';
 
 final _lastWifiInfoProvider = FutureProvider.autoDispose((ref) async {
   final service = ref.watch(localDeviceServiceProvider);
@@ -42,7 +50,7 @@ class CheckHealthScreen extends ConsumerWidget {
         scrolledUnderElevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => context.go('/'),
+          onPressed: () => context.goNamed(MenuGridScreen.name),
         ),
         title: const Text(
           'Check Health',
@@ -86,11 +94,11 @@ class CheckHealthScreen extends ConsumerWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: _DiagnosticActionButton(
-                onTap: () => context.push('/check_health/diagnostico'),
+                onTap: () => context.pushNamed(DiagnosticoScreen.name),
               ),
             ),
             const SizedBox(height: 30),
-            _MenuGrid(onTapChat: () => context.push('/check_health/chat')),
+            _MenuGrid(onTapChat: () => context.pushNamed(ChatScreen.name)),
             const SizedBox(height: 40),
           ],
         ),
@@ -115,7 +123,7 @@ class _WifiStatusCard extends ConsumerWidget {
     final color2 = branding.colorGradient2 ?? const Color(0xFF004E92);
 
     return InkWell(
-      onTap: () => context.push('/check_health/change_password'),
+      onTap: () => context.pushNamed(ChangePasswordScreen.name),
       borderRadius: BorderRadius.circular(25),
       child: Container(
         padding: const EdgeInsets.all(20),
@@ -252,7 +260,7 @@ class _MetricsGrid extends StatelessWidget {
           label: deviceCount.toString(),
           subLabel: 'Equipos',
           color: deviceCount > 0 ? const Color(0xFF00D285) : const Color(0xFF2C2C3E),
-          onTap: () => context.push('/check_health/dispositivos'),
+          onTap: () => context.pushNamed(DevicesScreen.name),
         )),
         Expanded(child: _MetricItem(
           svgAsset: 'assets/tools/loading-16-svgrepo-c.svg',
@@ -265,7 +273,7 @@ class _MetricsGrid extends StatelessWidget {
           label: senialStr,
           subLabel: 'Señal WiFi',
           color: wifiInfo != null ? const Color(0xFF00D285) : const Color(0xFF2C2C3E),
-          onTap: () => context.push('/check_health/offline'),
+          onTap: () => context.pushNamed(OfflineScreen.name),
         )),
         Expanded(child: _MetricItem(
           svgAsset: 'assets/tools/clock_speed.svg',
@@ -387,7 +395,7 @@ class _MenuGrid extends StatelessWidget {
           svgAsset: 'assets/tools/wifi_off.svg',
           title: 'Modo Offline',
           subtitle: 'Diagnóstico sin internet',
-          onTap: () => context.push('/check_health/offline'),
+          onTap: () => context.pushNamed(OfflineScreen.name),
         ),
         _MenuCard(
           svgAsset: 'assets/tools/robot.svg',
@@ -399,19 +407,19 @@ class _MenuGrid extends StatelessWidget {
           svgAsset: 'assets/tools/help-circle-svgrepo-.svg',
           title: 'Asistencia',
           subtitle: 'Solución guiada',
-          onTap: () => context.push('/check_health/asistencia'),
+          onTap: () => context.pushNamed(AsistenciaLoadingScreen.name),
         ),
         _MenuCard(
           svgAsset: 'assets/tools/doc-text-svgrepo-com.svg',
           title: 'Historial',
           subtitle: 'Ver diagnósticos',
-          onTap: () => context.go('/historial'),
+          onTap: () => context.pushNamed(MenuGridScreen.name),
         ),
         _MenuCard(
           svgAsset: 'assets/tools/gaming_pad.svg',
           title: 'Gaming',
           subtitle: 'Latencia y servidores',
-          onTap: () => context.push('/check_health/gaming'),
+          onTap: () => context.pushNamed(GamingScreen.name),
         ),
       ],
     );

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tvapp/core/theme/app_colors.dart';
+import 'package:tvapp/ui/shared/constants/app_assets.dart';
 import 'package:tvapp/core/theme/branding_config.dart';
 import 'package:tvapp/core/services/local_device_service.dart';
 import 'package:tvapp/core/domain/entities/tools/diagnostico.dart';
@@ -50,7 +51,7 @@ class CheckHealthScreen extends ConsumerWidget {
         scrolledUnderElevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => context.goNamed(MenuGridScreen.name),
+          onPressed: () => context.canPop() ? context.pop() : context.goNamed(MenuGridScreen.name),
         ),
         title: const Text(
           'Check Health',
@@ -146,8 +147,8 @@ class _WifiStatusCard extends ConsumerWidget {
                   padding: const EdgeInsets.all(15),
                   decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
                   child: SvgPicture.asset(
-                    'assets/tools/wifi.svg',
-                    colorFilter: const ColorFilter.mode(Color(0xFF00D285), BlendMode.srcIn),
+                    AppAssets.toolsWifi,
+                    colorFilter: const ColorFilter.mode(AppColors.success, BlendMode.srcIn),
                     width: 30,
                     height: 30,
                   ),
@@ -158,7 +159,7 @@ class _WifiStatusCard extends ConsumerWidget {
                   child: Container(
                     padding: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
-                      color: conectado ? const Color(0xFF7B61FF) : Colors.redAccent,
+                      color: conectado ? AppColors.accentBlue : Colors.redAccent,
                       shape: BoxShape.circle,
                     ),
                     child: Icon(conectado ? Icons.check : Icons.close, color: Colors.white, size: 12),
@@ -216,7 +217,7 @@ class _LastDiagnosticChip extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
       decoration: const BoxDecoration(
-        color: Color(0xFF32324A),
+        color: AppColors.container,
         borderRadius: BorderRadius.all(Radius.circular(15)),
       ),
       child: Row(
@@ -250,36 +251,36 @@ class _MetricsGrid extends StatelessWidget {
     return Row(
       children: [
         Expanded(child: _MetricItem(
-          svgAsset: 'assets/tools/check-square-svgrepo.svg',
+          svgAsset: AppAssets.toolsCheckSquare,
           label: isExito ? 'Excelente' : resultado.isNotEmpty ? resultado : 'Activo',
           subLabel: 'Estado',
-          color: isExito ? const Color(0xFF00D285) : const Color(0xFF2C2C3E),
+          color: isExito ? AppColors.success : AppColors.containerDark,
         )),
         Expanded(child: _MetricItem(
-          svgAsset: 'assets/tools/devices-svgrepo-com.svg',
+          svgAsset: AppAssets.toolsDevices,
           label: deviceCount.toString(),
           subLabel: 'Equipos',
-          color: deviceCount > 0 ? const Color(0xFF00D285) : const Color(0xFF2C2C3E),
+          color: deviceCount > 0 ? AppColors.success : AppColors.containerDark,
           onTap: () => context.pushNamed(DevicesScreen.name),
         )),
         Expanded(child: _MetricItem(
-          svgAsset: 'assets/tools/loading-16-svgrepo-c.svg',
+          svgAsset: AppAssets.toolsLoading,
           label: latenciaIsp != null ? '$latenciaIsp ms' : '--',
           subLabel: 'Lat. ISP',
-          color: latenciaIsp != null ? const Color(0xFF00D285) : const Color(0xFF2C2C3E),
+          color: latenciaIsp != null ? AppColors.success : AppColors.containerDark,
         )),
         Expanded(child: _MetricItem(
-          svgAsset: 'assets/tools/wifi.svg',
+          svgAsset: AppAssets.toolsWifi,
           label: senialStr,
           subLabel: 'Señal WiFi',
-          color: wifiInfo != null ? const Color(0xFF00D285) : const Color(0xFF2C2C3E),
+          color: wifiInfo != null ? AppColors.success : AppColors.containerDark,
           onTap: () => context.pushNamed(OfflineScreen.name),
         )),
         Expanded(child: _MetricItem(
-          svgAsset: 'assets/tools/clock_speed.svg',
+          svgAsset: AppAssets.toolsClockSpeed,
           label: velocidad != null ? '${velocidad.toStringAsFixed(0)} Mbps' : '--',
           subLabel: 'Velocidad',
-          color: velocidad != null ? const Color(0xFF00D285) : const Color(0xFF2C2C3E),
+          color: velocidad != null ? AppColors.success : AppColors.containerDark,
         )),
       ],
     );
@@ -311,13 +312,13 @@ class _MetricItem extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: const BoxDecoration(
-              color: Color(0xFF32324A),
+              color: AppColors.container,
               borderRadius: BorderRadius.all(Radius.circular(15)),
             ),
             child: SvgPicture.asset(
               svgAsset,
               colorFilter: ColorFilter.mode(
-                color == const Color(0xFF2C2C3E) ? Colors.white : color,
+                color == AppColors.containerDark ? Colors.white : color,
                 BlendMode.srcIn,
               ),
               width: 24,
@@ -356,7 +357,7 @@ class _DiagnosticActionButton extends StatelessWidget {
         width: double.infinity,
         height: 55,
         decoration: const BoxDecoration(
-          color: Color(0xFF00D285),
+          color: AppColors.success,
           borderRadius: BorderRadius.all(Radius.circular(15)),
         ),
         child: const Center(
@@ -392,31 +393,31 @@ class _MenuGrid extends StatelessWidget {
       childAspectRatio: 1.1,
       children: [
         _MenuCard(
-          svgAsset: 'assets/tools/wifi_off.svg',
+          svgAsset: AppAssets.toolsWifiOff,
           title: 'Modo Offline',
           subtitle: 'Diagnóstico sin internet',
           onTap: () => context.pushNamed(OfflineScreen.name),
         ),
         _MenuCard(
-          svgAsset: 'assets/tools/robot.svg',
+          svgAsset: AppAssets.toolsRobot,
           title: 'Chat',
           subtitle: 'Conversemos',
           onTap: onTapChat,
         ),
         _MenuCard(
-          svgAsset: 'assets/tools/help-circle-svgrepo-.svg',
+          svgAsset: AppAssets.toolsHelpCircle,
           title: 'Asistencia',
           subtitle: 'Solución guiada',
           onTap: () => context.pushNamed(AsistenciaLoadingScreen.name),
         ),
         _MenuCard(
-          svgAsset: 'assets/tools/doc-text-svgrepo-com.svg',
+          svgAsset: AppAssets.toolsDocText,
           title: 'Historial',
           subtitle: 'Ver diagnósticos',
           onTap: () => context.pushNamed(MenuGridScreen.name),
         ),
         _MenuCard(
-          svgAsset: 'assets/tools/gaming_pad.svg',
+          svgAsset: AppAssets.toolsGamingPad,
           title: 'Gaming',
           subtitle: 'Latencia y servidores',
           onTap: () => context.pushNamed(GamingScreen.name),
@@ -447,7 +448,7 @@ class _MenuCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(15),
         decoration: const BoxDecoration(
-          color: Color(0xFF32324A),
+          color: AppColors.container,
           borderRadius: BorderRadius.all(Radius.circular(20)),
         ),
         child: Column(

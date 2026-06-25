@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tvapp/core/theme/app_colors.dart';
+import 'package:tvapp/ui/shared/constants/app_assets.dart';
 import 'package:tvapp/core/services/local_device_service.dart';
 import 'package:tvapp/core/domain/entities/tools/wifi_info.dart';
 
@@ -52,13 +53,13 @@ class OfflineScreen extends ConsumerWidget {
                     style: TextStyle(color: AppColors.textBody, fontSize: 13)),
                 const SizedBox(height: 30),
                 _OfflineItem(
-                  iconPath: 'assets/tools/smartphone.svg',
+                  iconPath: AppAssets.toolsSmartphone,
                   title: 'Estado del dispositivo',
                   subtitle: '${device['model'] ?? '--'} · ${device['osVersion'] ?? '--'}',
                 ),
                 const SizedBox(height: 15),
                 _OfflineItem(
-                  iconPath: 'assets/tools/wifi.svg',
+                  iconPath: AppAssets.toolsWifi,
                   title: 'Red WiFi',
                   subtitle: wifi.ssid != null
                       ? '${wifi.ssid} · ${wifi.signalStrengthDbm ?? '--'} dBm (${wifi.band})'
@@ -66,7 +67,7 @@ class OfflineScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 15),
                 _OfflineItem(
-                  iconPath: 'assets/tools/router.svg',
+                  iconPath: AppAssets.toolsRouter,
                   title: 'Conexión al Router',
                   subtitle: wifi.gatewayAddress != null
                       ? 'IP: ${wifi.ipAddress ?? '--'} · Gateway: ${wifi.gatewayAddress}'
@@ -74,7 +75,7 @@ class OfflineScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 15),
                 _OfflineItem(
-                  iconPath: 'assets/tools/pc.svg',
+                  iconPath: AppAssets.toolsPc,
                   title: 'Dispositivos en Red Local',
                   subtitle: '${devices.length} dispositivo${devices.length == 1 ? '' : 's'} conectado${devices.length == 1 ? '' : 's'}',
                 ),
@@ -88,7 +89,7 @@ class OfflineScreen extends ConsumerWidget {
           },
           loading: () => const Padding(
             padding: EdgeInsets.only(top: 80),
-            child: Center(child: CircularProgressIndicator(color: Color(0xFF00D285))),
+            child: Center(child: CircularProgressIndicator(color: AppColors.success)),
           ),
           error: (err, _) => Padding(
             padding: const EdgeInsets.only(top: 80),
@@ -112,7 +113,7 @@ class _OfflineItem extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: const BoxDecoration(
-        color: Color(0xFF32324A),
+        color: AppColors.container,
         borderRadius: BorderRadius.all(Radius.circular(20)),
       ),
       child: Row(
@@ -136,7 +137,7 @@ class _OfflineItem extends StatelessWidget {
                   children: [
                     Text(title,
                         style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
-                    const Text('Disponible', style: TextStyle(color: Color(0xFF00D285), fontSize: 11)),
+                    const Text('Disponible', style: TextStyle(color: AppColors.success, fontSize: 11)),
                   ],
                 ),
                 Text(subtitle, style: const TextStyle(color: AppColors.textBody, fontSize: 11)),
@@ -162,7 +163,7 @@ class _ExecuteButton extends StatelessWidget {
         width: double.infinity,
         height: 60,
         decoration: const BoxDecoration(
-          color: Color(0xFF00D285),
+          color: AppColors.success,
           borderRadius: BorderRadius.all(Radius.circular(15)),
         ),
         child: const Row(

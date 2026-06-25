@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tvapp/config/environment/environment.dart';
+import 'package:tvapp/core/application/use_cases/tools/run_diagnostico_use_case.dart';
 import 'package:tvapp/core/services/tools/network_analyzer_service.dart';
 import '../../../core/services/local_device_service.dart';
-import 'package:tvapp/core/domain/entities/tools/diagnostico.dart';
 import 'package:tvapp/storage/tools/local_storage.dart';
 import 'diagnostico_providers.dart';
 import 'fibra_providers.dart';
@@ -88,70 +88,56 @@ class DiagnosticoNotifier extends Notifier<DiagnosticoState> {
 
   Future<void> iniciarDiagnostico() async {
     try {
-      final googleTarget = LocalStorage.getGooglePingTarget() ?? '8.8.8.8';
-      final ispTarget = LocalStorage.getIspPingTarget() ?? '1.1.1.1';
-
-      final networkService = ref.read(networkAnalyzerServiceProvider);
-      final localDevice = ref.read(localDeviceServiceProvider);
-
-      state = state.copyWith(step: DiagnosticoStep.pingGoogle);
-      final pingGoogle = await networkService.ping(googleTarget);
-
-      state = state.copyWith(
-        step: DiagnosticoStep.pingIsp,
-        latenciaGoogleMs: pingGoogle.avgMs.round(),
-      );
-      final pingIsp = await networkService.ping(ispTarget);
-
-      state = state.copyWith(
-        step: DiagnosticoStep.speedtest,
-        latenciaIspMs: pingIsp.avgMs.round(),
-      );
-      final speed = await networkService.runSpeedTest(serverBaseUrl: Environment.toolsBaseUrl);
-
-      state = state.copyWith(
-        step: DiagnosticoStep.wifiInfo,
-        velocidadBajadaMbps: speed.downloadMbps,
-        velocidadSubidaMbps: speed.uploadMbps,
-      );
-      final wifiInfo = await localDevice.getWifiInfo();
-
-      state = state.copyWith(
-        step: DiagnosticoStep.fibra,
-        wifiSsid: wifiInfo.ssid,
-        wifiSenialDbm: wifiInfo.signalStrengthDbm,
-        wifiBanda: wifiInfo.band,
-        wifiGateway: wifiInfo.gatewayAddress,
-      );
-      final fibra = await ref.read(fibraRepositoryProvider).getFibra();
-
-      state = state.copyWith(
-        step: DiagnosticoStep.guardando,
-        fibraPotenciaDbm: fibra.potenciaDbm,
-        fibraEstado: fibra.estado,
+      final useCase = RunDiagnosticoUseCase(
+        networkService: ref.read(networkAnalyzerServiceProvider),
+        localDeviceService: ref.read(localDeviceServiceProvider),
+        diagnosticoRepo: ref.read(diagnosticoRepositoryProvider),
+        fibraRepo: ref.read(fibraRepositoryProvider),
       );
 
-      final clienteId = LocalStorage.getClienteId() ?? '';
-      final result = await ref.read(diagnosticoRepositoryProvider).saveDiagnostico(
-            DiagnosticoRequest(
-              clienteId: clienteId,
-              latenciaGoogleMs: pingGoogle.avgMs.round(),
-              latenciaIspMs: pingIsp.avgMs.round(),
-              velocidadBajadaMbps: speed.downloadMbps,
-              velocidadSubidaMbps: speed.uploadMbps,
-              fibraPotenciaDbm: fibra.potenciaDbm,
-              fibraEstado: fibra.estado,
-            ),
+      final result = await useCase.execute(
+        RunDiagnosticoInput(
+          googleTarget: LocalStorage.getGooglePingTarget() ?? '8.8.8.8',
+          ispTarget: LocalStorage.getIspPingTarget() ?? '1.1.1.1',
+          clienteId: LocalStorage.getClienteId() ?? '',
+          serverBaseUrl: Environment.toolsBaseUrl,
+        ),
+        onProgress: (progress) {
+          state = state.copyWith(
+            step: _mapProgress(progress),
           );
+        },
+      );
 
       state = state.copyWith(
         step: DiagnosticoStep.completado,
+        latenciaGoogleMs: result.latenciaGoogleMs,
+        latenciaIspMs: result.latenciaIspMs,
+        velocidadBajadaMbps: result.velocidadBajadaMbps,
+        velocidadSubidaMbps: result.velocidadSubidaMbps,
+        wifiSsid: result.wifiSsid,
+        wifiSenialDbm: result.wifiSenialDbm,
+        wifiBanda: result.wifiBanda,
+        wifiGateway: result.wifiGateway,
+        fibraPotenciaDbm: result.fibraPotenciaDbm,
+        fibraEstado: result.fibraEstado,
         resultadoFinal: result.resultado,
       );
 
       ref.invalidate(historialDiagnosticoProvider);
     } catch (e) {
       state = state.copyWith(step: DiagnosticoStep.error, errorMsg: e.toString());
+    }
+  }
+
+  DiagnosticoStep _mapProgress(DiagnosticoProgress progress) {
+    switch (progress) {
+      case DiagnosticoProgress.pingGoogle: return DiagnosticoStep.pingGoogle;
+      case DiagnosticoProgress.pingIsp:   return DiagnosticoStep.pingIsp;
+      case DiagnosticoProgress.speedtest: return DiagnosticoStep.speedtest;
+      case DiagnosticoProgress.wifiInfo:  return DiagnosticoStep.wifiInfo;
+      case DiagnosticoProgress.fibra:     return DiagnosticoStep.fibra;
+      case DiagnosticoProgress.guardando: return DiagnosticoStep.guardando;
     }
   }
 

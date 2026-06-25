@@ -35,7 +35,7 @@ class StreamingScreen extends ConsumerWidget {
             const Center(
               child: CircleAvatar(
                 radius: 40,
-                backgroundColor: Color(0xFF00D285),
+                backgroundColor: AppColors.success,
                 child: Icon(Icons.play_circle_fill, color: Colors.white, size: 50),
               ),
             ),
@@ -52,11 +52,11 @@ class StreamingScreen extends ConsumerWidget {
             platformsAsync.when(
               data: (platforms) => _PlatformListCard(
                 platforms: platforms,
-                onPlatformTap: (p) => context.push('/check_health/streaming/${p.id}'),
+                onPlatformTap: (p) => context.push('/tools/streaming/detail', extra: p.id),
               ),
               loading: () => const Padding(
                 padding: EdgeInsets.all(40),
-                child: CircularProgressIndicator(color: Color(0xFF00D285)),
+                child: CircularProgressIndicator(color: AppColors.success),
               ),
               error: (err, _) => Text('Error: $err'),
             ),
@@ -79,7 +79,7 @@ class _PlatformListCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFF32324A),
+        color: AppColors.container,
         borderRadius: BorderRadius.circular(25),
       ),
       child: Column(

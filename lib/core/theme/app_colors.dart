@@ -7,4 +7,15 @@ class AppColors {
   static const Color textBody = Color(0xFFB0B0C3);
   static const Color textHeading = Colors.white;
   static const Color accentPurple = Color(0xFF4A4A6A);
+
+  // Status colors
+  static const Color success = Color(0xFF00D285);
+  static const Color error = Color(0xFFFF4B55);
+
+  // Container colors
+  static const Color container = Color(0xFF32324A);
+  static const Color containerDark = Color(0xFF24263D);
+
+  // Accent colors
+  static const Color accentBlue = Color(0xFF7B61FF);
 }

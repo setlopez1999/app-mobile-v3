@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tvapp/core/theme/app_colors.dart';
+import 'package:tvapp/ui/shared/constants/app_assets.dart';
 import 'package:tvapp/core/domain/entities/tools/servidor_juego.dart';
 import 'package:tvapp/ui/providers/tools/gaming_server_providers.dart';
 
@@ -22,20 +23,20 @@ class GamingScreen extends ConsumerWidget {
 
   String _logoForJuego(String juego) {
     final lower = juego.toLowerCase();
-    if (lower.contains('counter strike') || lower.contains('cs')) return 'assets/logos/logo_cs2.png';
-    if (lower.contains('dota')) return 'assets/logos/logo_dota2.png';
-    if (lower.contains('fortnite')) return 'assets/logos/logo_fortnite.png';
-    if (lower.contains('valorant')) return 'assets/logos/logo_valorant.png';
-    if (lower.contains('pubg')) return 'assets/logos/logo_pubg.png';
-    return 'assets/logos/logo_valorant.png';
+    if (lower.contains('counter strike') || lower.contains('cs')) return AppAssets.logoCs2;
+    if (lower.contains('dota')) return AppAssets.logoDota2;
+    if (lower.contains('fortnite')) return AppAssets.logoFortnite;
+    if (lower.contains('valorant')) return AppAssets.logoValorant;
+    if (lower.contains('pubg')) return AppAssets.logoPubg;
+    return AppAssets.logoValorant;
   }
 
   Color _colorForEstado(String estado) {
     switch (estado) {
-      case 'EXCELENTE': return const Color(0xFF00D285);
+      case 'EXCELENTE': return AppColors.success;
       case 'BUENO': return Colors.amber;
       case 'MALO': return Colors.orange;
-      case 'SIN_CONEXIÓN': return Colors.redAccent;
+      case 'SIN_CONEXIÓN': return AppColors.error;
       default: return Colors.grey;
     }
   }
@@ -66,7 +67,7 @@ class GamingScreen extends ConsumerWidget {
             const Center(
               child: CircleAvatar(
                 radius: 40,
-                backgroundColor: Color(0xFF00D285),
+                backgroundColor: AppColors.success,
                 child: Icon(Icons.videogame_asset, color: Colors.white, size: 50),
               ),
             ),
@@ -83,7 +84,7 @@ class GamingScreen extends ConsumerWidget {
             servidoresAsync.when(
               data: (servidores) => _GamesListCard(
                 servidores: servidores,
-                onGameTap: (sv) => context.push('/check_health/gaming/${_gameNameToId(sv.juego)}'),
+                onGameTap: (sv) => context.push('/tools/gaming/detail', extra: _gameNameToId(sv.juego)),
                 logoForJuego: _logoForJuego,
                 colorForEstado: _colorForEstado,
               ),
@@ -122,7 +123,7 @@ class _GamesListCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFF32324A),
+        color: AppColors.container,
         borderRadius: BorderRadius.circular(25),
       ),
       child: Column(

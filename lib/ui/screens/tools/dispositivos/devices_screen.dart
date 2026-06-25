@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tvapp/core/theme/app_colors.dart';
 import 'package:tvapp/ui/providers/tools/dispositivos_providers.dart';
+import 'package:tvapp/ui/shared/constants/app_assets.dart';
 
 class DevicesScreen extends ConsumerWidget {
   static const String name = 'Devices';
@@ -12,11 +13,11 @@ class DevicesScreen extends ConsumerWidget {
 
   String _svgForTipo(String tipo) {
     switch (tipo) {
-      case 'smartphone': return 'assets/tools/smartphone.svg';
-      case 'laptop': return 'assets/tools/laptop.svg';
-      case 'pc': return 'assets/tools/pc.svg';
-      case 'router': return 'assets/tools/router.svg';
-      default: return 'assets/tools/smartphone.svg';
+      case 'smartphone': return AppAssets.toolsSmartphone;
+      case 'laptop': return AppAssets.toolsLaptop;
+      case 'pc': return AppAssets.toolsPc;
+      case 'router': return AppAssets.toolsRouter;
+      default: return AppAssets.toolsSmartphone;
     }
   }
 
@@ -69,7 +70,7 @@ class DevicesScreen extends ConsumerWidget {
               ],
             );
           },
-          loading: () => const Center(child: CircularProgressIndicator(color: Color(0xFF00D285))),
+          loading: () => const Center(child: CircularProgressIndicator(color: AppColors.success)),
           error: (err, _) => const Center(
             child: Text('Error al cargar dispositivos', style: TextStyle(color: Colors.red)),
           ),
@@ -90,14 +91,14 @@ class _DevicesHeader extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
       decoration: BoxDecoration(
-        color: const Color(0xFF32324A),
+        color: AppColors.container,
         borderRadius: BorderRadius.circular(25),
       ),
       child: Column(
         children: [
           const CircleAvatar(
             radius: 35,
-            backgroundColor: Color(0xFF00D285),
+            backgroundColor: AppColors.success,
             child: Icon(Icons.check, color: Colors.white, size: 45),
           ),
           const SizedBox(height: 25),
@@ -130,14 +131,14 @@ class _DeviceItem extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFF32324A),
+        color: AppColors.container,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
         children: [
           SvgPicture.asset(
             svgAsset,
-            colorFilter: const ColorFilter.mode(Color(0xFF00D285), BlendMode.srcIn),
+            colorFilter: const ColorFilter.mode(AppColors.success, BlendMode.srcIn),
             width: 30,
             height: 30,
           ),
@@ -151,7 +152,7 @@ class _DeviceItem extends StatelessWidget {
                 Text(
                   conectado ? 'Conectado' : 'Desconectado',
                   style: TextStyle(
-                    color: conectado ? const Color(0xFF00D285) : Colors.white30,
+                    color: conectado ? AppColors.success : Colors.white30,
                     fontSize: 13,
                   ),
                 ),

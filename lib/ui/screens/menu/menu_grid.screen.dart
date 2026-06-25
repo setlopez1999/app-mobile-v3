@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:tvapp/core/theme/app_colors.dart';
 import 'package:tvapp/ui/providers/auth/auth_provider.dart';
 import 'package:tvapp/ui/screens/home/home.screen.dart';
 import 'package:tvapp/ui/screens/tools/check_health/check_health_screen.dart';
+import 'package:tvapp/ui/shared/constants/app_assets.dart';
 
 /// Pantalla principal post-login.
 /// Grid de servicios: Eventos, IPTV, VOD, Cámaras, Club de descuentos, Check Health.
@@ -46,13 +48,39 @@ class _MenuGridScreenState extends ConsumerState<MenuGridScreen> {
 
   void _logout() {
     ref.read(authProvider.notifier).logout();
-    // El listener del router en router.dart redirige a /login
-    // cuando authProvider pasa a AuthState.initial()
+  }
+
+  Future<bool?> _showLogoutDialog() {
+    return showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.container,
+        title: const Text('¿Cerrar sesión?', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        content: const Text('¿Deseas salir de tu cuenta?', style: TextStyle(color: AppColors.textBody)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancelar', style: TextStyle(color: AppColors.textBody)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Cerrar sesión', style: TextStyle(color: AppColors.error)),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        final shouldLogout = await _showLogoutDialog();
+        if (shouldLogout == true && mounted) _logout();
+      },
+      child: Scaffold(
       backgroundColor: const Color(0xFF1E1E32),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -93,6 +121,7 @@ class _MenuGridScreenState extends ConsumerState<MenuGridScreen> {
           ),
         ),
       ),
+      ),
     );
   }
 }
@@ -109,7 +138,7 @@ class _AppBar extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         SvgPicture.asset(
-          'assets/hub/logo_oneplay.svg',
+          AppAssets.logoOneplay,
           height: 25,
           fit: BoxFit.contain,
         ),
@@ -125,7 +154,7 @@ class _AppBar extends StatelessWidget {
                     width: 8,
                     height: 8,
                     decoration: const BoxDecoration(
-                      color: Color(0xFFFF4B55),
+                      color: AppColors.error,
                       shape: BoxShape.circle,
                     ),
                   ),
@@ -137,7 +166,7 @@ class _AppBar extends StatelessWidget {
               onTap: onProfileTap,
               child: const CircleAvatar(
                 radius: 16,
-                backgroundColor: Color(0xFF32324A),
+                backgroundColor: AppColors.container,
                 child: Icon(Icons.person_outline, color: Colors.white, size: 20),
               ),
             ),
@@ -204,7 +233,7 @@ class _BannerCarousel extends StatelessWidget {
               height: 8,
               decoration: BoxDecoration(
                 color: currentIndex == index
-                    ? const Color(0xFF00D285)
+                    ? AppColors.success
                     : Colors.white.withOpacity(0.3),
                 borderRadius: BorderRadius.circular(4),
               ),
@@ -228,38 +257,38 @@ class _ServicesGrid extends StatelessWidget {
       childAspectRatio: 0.85,
       children: [
         _HubServiceCard(
-          svgAsset: 'assets/hub/eventos.svg',
+          svgAsset: AppAssets.hubEventos,
           title: 'Eventos',
           subtitle: 'Deportes, conciertos y mas...',
           onTap: () {},
         ),
         _HubServiceCard(
-          svgAsset: 'assets/hub/tv.svg',
+          svgAsset: AppAssets.hubTv,
           title: 'IPTV',
           subtitle: 'Canales para todos',
-          onTap: () => context.goNamed(HomeScreen.name),
+          onTap: () => context.pushNamed(HomeScreen.name),
         ),
         _HubServiceCard(
-          svgAsset: 'assets/hub/play.svg',
+          svgAsset: AppAssets.hubPlay,
           title: 'VOD',
           subtitle: 'Entretenimiento',
           onTap: () {},
         ),
         _HubServiceCard(
-          svgAsset: 'assets/hub/shield_cam.svg',
+          svgAsset: AppAssets.hubShieldCam,
           title: 'Cámaras',
           subtitle: 'Cuida tu hogar y a los tuyos',
           onTap: () {},
         ),
         _HubServiceCard(
-          svgAsset: 'assets/hub/descuento.svg',
+          svgAsset: AppAssets.hubDescuento,
           title: 'Club de descuentos',
           subtitle: 'Restaurantes, tiendas y retail',
           isNew: true,
           onTap: () {},
         ),
         _HubServiceCard(
-          svgAsset: 'assets/hub/check_health_icon.svg',
+          svgAsset: AppAssets.hubCheckHealth,
           title: 'Check Health',
           subtitle: 'Revisa el estado de tu WIFI',
           isHealth: true,
@@ -339,7 +368,7 @@ class _HubServiceCard extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF00D285),
+                    color: AppColors.success,
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: const Text(
@@ -382,7 +411,7 @@ class _ProfileSheet extends StatelessWidget {
           const SizedBox(height: 24),
           const CircleAvatar(
             radius: 36,
-            backgroundColor: Color(0xFF32324A),
+            backgroundColor: AppColors.container,
             child: Icon(Icons.person_outline, color: Colors.white, size: 36),
           ),
           const SizedBox(height: 28),
@@ -392,11 +421,11 @@ class _ProfileSheet extends StatelessWidget {
             width: double.infinity,
             child: TextButton.icon(
               onPressed: onLogout,
-              icon: const Icon(Icons.logout, color: Color(0xFFFF4B55), size: 20),
+              icon: const Icon(Icons.logout, color: AppColors.error, size: 20),
               label: const Text(
                 'Cerrar sesión',
                 style: TextStyle(
-                  color: Color(0xFFFF4B55),
+                  color: AppColors.error,
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
                 ),

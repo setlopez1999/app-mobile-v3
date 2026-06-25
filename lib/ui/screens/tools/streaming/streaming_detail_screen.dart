@@ -41,7 +41,7 @@ class StreamingDetailScreen extends ConsumerWidget {
           }
           return _PlatformContent(platform: platform);
         },
-        loading: () => const Center(child: CircularProgressIndicator(color: Color(0xFF00D285))),
+        loading: () => const Center(child: CircularProgressIndicator(color: AppColors.success)),
         error: (err, __) => Center(child: Text('Error: $err')),
       ),
     );
@@ -90,7 +90,7 @@ class _PlatformContent extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: const Color(0xFF24263D),
+              color: AppColors.containerDark,
               borderRadius: BorderRadius.circular(30),
             ),
             child: Column(
@@ -98,7 +98,7 @@ class _PlatformContent extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.dns, color: Color(0xFF00D285), size: 20),
+                    const Icon(Icons.dns, color: AppColors.success, size: 20),
                     const SizedBox(width: 10),
                     Text('SERVIDOR',
                         style: TextStyle(
@@ -134,11 +134,11 @@ class _SpeedCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(15),
-      decoration: BoxDecoration(color: const Color(0xFF24263D), borderRadius: BorderRadius.circular(20)),
+      decoration: BoxDecoration(color: AppColors.containerDark, borderRadius: BorderRadius.circular(20)),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, color: const Color(0xFF00D285), size: 30),
+          Icon(icon, color: AppColors.success, size: 30),
           const SizedBox(height: 10),
           Text(label,
               style: TextStyle(
@@ -152,7 +152,7 @@ class _SpeedCard extends StatelessWidget {
                   style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
               const SizedBox(width: 2),
               const Text('Mbps',
-                  style: TextStyle(color: Color(0xFF00D285), fontSize: 10, fontWeight: FontWeight.bold)),
+                  style: TextStyle(color: AppColors.success, fontSize: 10, fontWeight: FontWeight.bold)),
             ],
           ),
         ],

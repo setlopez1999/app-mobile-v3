@@ -51,7 +51,7 @@ class _GamingStreamingScreenState extends State<GamingStreamingScreen> {
             _CategoryCard(
               title: 'Gaming',
               subtitle: 'Latencia en tiempo real a servidores sudamericanos',
-              iconPath: 'assets/gaming_pad.svg',
+              iconPath: 'assets/tools/gaming_pad.svg',
               isExpanded: isGamingExpanded,
               onToggle: () => setState(() => isGamingExpanded = !isGamingExpanded),
             ),
@@ -59,7 +59,7 @@ class _GamingStreamingScreenState extends State<GamingStreamingScreen> {
             _CategoryCard(
               title: 'Streaming',
               subtitle: 'Rendimiento para transmisión en vivo',
-              iconPath: 'assets/streaming.svg',
+              iconPath: 'assets/tools/streaming.svg',
               isExpanded: isStreamingExpanded,
               onToggle: () => setState(() => isStreamingExpanded = !isStreamingExpanded),
             ),

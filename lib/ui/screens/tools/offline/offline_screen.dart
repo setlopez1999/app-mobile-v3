@@ -52,13 +52,13 @@ class OfflineScreen extends ConsumerWidget {
                     style: TextStyle(color: AppColors.textBody, fontSize: 13)),
                 const SizedBox(height: 30),
                 _OfflineItem(
-                  iconPath: 'assets/smartphone.svg',
+                  iconPath: 'assets/tools/smartphone.svg',
                   title: 'Estado del dispositivo',
                   subtitle: '${device['model'] ?? '--'} · ${device['osVersion'] ?? '--'}',
                 ),
                 const SizedBox(height: 15),
                 _OfflineItem(
-                  iconPath: 'assets/wifi.svg',
+                  iconPath: 'assets/tools/wifi.svg',
                   title: 'Red WiFi',
                   subtitle: wifi.ssid != null
                       ? '${wifi.ssid} · ${wifi.signalStrengthDbm ?? '--'} dBm (${wifi.band})'
@@ -66,7 +66,7 @@ class OfflineScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 15),
                 _OfflineItem(
-                  iconPath: 'assets/router.svg',
+                  iconPath: 'assets/tools/router.svg',
                   title: 'Conexión al Router',
                   subtitle: wifi.gatewayAddress != null
                       ? 'IP: ${wifi.ipAddress ?? '--'} · Gateway: ${wifi.gatewayAddress}'
@@ -74,7 +74,7 @@ class OfflineScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 15),
                 _OfflineItem(
-                  iconPath: 'assets/pc.svg',
+                  iconPath: 'assets/tools/pc.svg',
                   title: 'Dispositivos en Red Local',
                   subtitle: '${devices.length} dispositivo${devices.length == 1 ? '' : 's'} conectado${devices.length == 1 ? '' : 's'}',
                 ),

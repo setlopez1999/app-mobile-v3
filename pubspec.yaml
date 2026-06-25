@@ -65,6 +65,8 @@ flutter:
     - assets/isp/
     - assets/icons/
     - assets/hub/
+    - assets/tools/
+    - assets/logos/
     - assets/video/
     - assets/isp/icons/streamlink/drawable/
     - assets/sounds/speech_to_text_listening.m4r

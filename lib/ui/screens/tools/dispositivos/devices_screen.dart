@@ -12,11 +12,11 @@ class DevicesScreen extends ConsumerWidget {
 
   String _svgForTipo(String tipo) {
     switch (tipo) {
-      case 'smartphone': return 'assets/smartphone.svg';
-      case 'laptop': return 'assets/laptop.svg';
-      case 'pc': return 'assets/pc.svg';
-      case 'router': return 'assets/router.svg';
-      default: return 'assets/smartphone.svg';
+      case 'smartphone': return 'assets/tools/smartphone.svg';
+      case 'laptop': return 'assets/tools/laptop.svg';
+      case 'pc': return 'assets/tools/pc.svg';
+      case 'router': return 'assets/tools/router.svg';
+      default: return 'assets/tools/smartphone.svg';
     }
   }
 

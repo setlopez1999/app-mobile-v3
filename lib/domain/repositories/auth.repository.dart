@@ -81,7 +81,7 @@ class AuthRepository {
             )
         );
       }
-      assert(() { debugPrint('[Auth] device id: $id'); return true; }());
+      log('device id: $id');
       final data = res.data;
       if (data!['code'] == 200) {
         await reRegisterFCM(email);

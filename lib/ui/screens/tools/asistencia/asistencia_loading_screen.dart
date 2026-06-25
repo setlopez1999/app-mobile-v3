@@ -25,7 +25,7 @@ class _AsistenciaLoadingScreenState extends State<AsistenciaLoadingScreen>
       ..addListener(() => setState(() {}))
       ..addStatusListener((status) {
         if (status == AnimationStatus.completed) {
-          context.pushReplacement('/check_health/asistencia/problem');
+          context.pushReplacement('/tools/check-health');
         }
       });
     _controller.forward();

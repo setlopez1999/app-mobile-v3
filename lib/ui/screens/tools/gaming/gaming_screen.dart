@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tvapp/core/theme/app_colors.dart';
 import 'package:tvapp/core/domain/entities/tools/servidor_juego.dart';
-import '../logic/gaming_server_providers.dart';
+import 'package:tvapp/ui/providers/tools/gaming_server_providers.dart';
 
 class GamingScreen extends ConsumerWidget {
   static const String name = 'Gaming';

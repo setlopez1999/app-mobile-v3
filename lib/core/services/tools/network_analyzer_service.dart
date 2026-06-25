@@ -163,14 +163,14 @@ class NetworkAnalyzerService {
     const cfSizes = [25, 10, 5];
     for (final mb in cfSizes) {
       try {
-        final uri = Uri.parse('https://speed.cloudflare.com/__down?bytes=${mb * 1_000_000}');
+        final uri = Uri.parse('https://speed.cloudflare.com/__down?bytes=${mb * 1000000}');
         final stopwatch = Stopwatch()..start();
         final resp = await http.get(uri).timeout(const Duration(seconds: 20));
         stopwatch.stop();
         final durationSec = stopwatch.elapsedMilliseconds / 1000.0;
         if (durationSec <= 0) continue;
         final bytes = resp.bodyBytes.length;
-        final mbps = (bytes * 8) / (durationSec * 1_000_000);
+        final mbps = (bytes * 8) / (durationSec * 1000000);
         debugPrint('[Speedtest] CF ${mb}MB: ${mbps.toStringAsFixed(2)} Mbps');
         if (mbps > 0) return mbps;
       } catch (e) {
@@ -191,7 +191,7 @@ class NetworkAnalyzerService {
         final durationSec = stopwatch.elapsedMilliseconds / 1000.0;
         if (durationSec <= 0) continue;
         final bytes = resp.bodyBytes.length;
-        final mbps = (bytes * 8) / (durationSec * 1_000_000);
+        final mbps = (bytes * 8) / (durationSec * 1000000);
         debugPrint('[Speedtest] Backend ${mb}MB: ${mbps.toStringAsFixed(2)} Mbps');
         if (mbps > 0) return mbps;
       } catch (e) {
@@ -214,7 +214,7 @@ class NetworkAnalyzerService {
       stopwatch.stop();
       final durationSec = stopwatch.elapsedMilliseconds / 1000.0;
       if (durationSec > 0) {
-        final mbps = (uploadSize * 8) / (durationSec * 1_000_000);
+        final mbps = (uploadSize * 8) / (durationSec * 1000000);
         debugPrint('[Speedtest] CF upload: ${mbps.toStringAsFixed(2)} Mbps');
         return mbps;
       }
@@ -234,7 +234,7 @@ class NetworkAnalyzerService {
       stopwatch.stop();
       final durationSec = stopwatch.elapsedMilliseconds / 1000.0;
       if (durationSec > 0) {
-        final mbps = (smallUpload * 8) / (durationSec * 1_000_000);
+        final mbps = (smallUpload * 8) / (durationSec * 1000000);
         debugPrint('[Speedtest] Backend upload: ${mbps.toStringAsFixed(2)} Mbps');
         return mbps;
       }

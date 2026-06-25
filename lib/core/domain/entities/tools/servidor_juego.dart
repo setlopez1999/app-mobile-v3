@@ -5,7 +5,7 @@ part 'servidor_juego.g.dart';
 
 /// [estado] puede ser: "EXCELENTE" | "BUENO" | "MALO" | "SIN_CONEXIÓN"
 @freezed
-class ServidorJuego with _$ServidorJuego {
+abstract class ServidorJuego with _$ServidorJuego {
   const factory ServidorJuego({
     required String id,
     required String juego,

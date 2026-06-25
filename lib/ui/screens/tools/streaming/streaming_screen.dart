@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tvapp/core/theme/app_colors.dart';
-import '../models/streaming_platform.dart';
-import '../providers/streaming_provider.dart';
+import 'package:tvapp/core/domain/entities/tools/streaming_platform.dart';
+import 'package:tvapp/ui/providers/tools/streaming_provider.dart';
 
 class StreamingScreen extends ConsumerWidget {
   static const String name = 'Streaming';

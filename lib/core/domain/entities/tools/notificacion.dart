@@ -4,7 +4,7 @@ part 'notificacion.freezed.dart';
 part 'notificacion.g.dart';
 
 @freezed
-class Notificacion with _$Notificacion {
+abstract class Notificacion with _$Notificacion {
   const factory Notificacion({
     required String id,
     required String titulo,

@@ -3,12 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tvapp/core/theme/app_colors.dart';
-import '../../../core/theme/branding_config.dart';
-import '../../../core/services/local_device_service.dart';
+import 'package:tvapp/core/theme/branding_config.dart';
+import 'package:tvapp/core/services/local_device_service.dart';
 import 'package:tvapp/core/domain/entities/tools/diagnostico.dart';
-import '../../dispositivos/logic/dispositivos_providers.dart';
-import '../../fibra/logic/fibra_providers.dart';
-import '../../diagnostico/logic/diagnostico_providers.dart';
+import 'package:tvapp/ui/providers/tools/dispositivos_providers.dart';
+import 'package:tvapp/ui/providers/tools/fibra_providers.dart';
+import 'package:tvapp/ui/providers/tools/diagnostico_providers.dart';
 
 final _lastWifiInfoProvider = FutureProvider.autoDispose((ref) async {
   final service = ref.watch(localDeviceServiceProvider);
@@ -110,10 +110,9 @@ class _WifiStatusCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final conectado = fibraEstado == 'OK';
-    final brandingAsync = ref.watch(brandingProvider);
-    final branding = brandingAsync.valueOrNull;
-    final color1 = branding?.colorGradient1 ?? const Color(0xFF00CC66);
-    final color2 = branding?.colorGradient2 ?? const Color(0xFF004E92);
+    final branding = ref.watch(brandingProvider);
+    final color1 = branding.colorGradient1 ?? const Color(0xFF00CC66);
+    final color2 = branding.colorGradient2 ?? const Color(0xFF004E92);
 
     return InkWell(
       onTap: () => context.push('/check_health/change_password'),

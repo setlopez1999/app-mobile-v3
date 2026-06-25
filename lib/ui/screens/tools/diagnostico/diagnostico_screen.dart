@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:tvapp/core/theme/app_colors.dart';
-import '../logic/diagnostico_notifier.dart';
+import 'package:tvapp/ui/providers/tools/diagnostico_notifier.dart';
 
 class DiagnosticoScreen extends ConsumerStatefulWidget {
   static const String name = 'Diagnostico';

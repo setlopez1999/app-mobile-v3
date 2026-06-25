@@ -3,7 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tvapp/core/theme/app_colors.dart';
-import '../../../core/services/local_device_service.dart';
+import 'package:tvapp/core/services/local_device_service.dart';
 import 'package:tvapp/core/domain/entities/tools/wifi_info.dart';
 
 final _offlineScanProvider = FutureProvider.autoDispose((ref) async {

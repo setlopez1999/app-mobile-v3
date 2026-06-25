@@ -4,7 +4,7 @@ part 'streaming_platform.freezed.dart';
 part 'streaming_platform.g.dart';
 
 @freezed
-class StreamingPlatform with _$StreamingPlatform {
+abstract class StreamingPlatform with _$StreamingPlatform {
   const factory StreamingPlatform({
     required String id,
     required String name,

@@ -5,7 +5,7 @@ part 'remote_config.g.dart';
 
 /// IPs de destino para los pings nativos del diagnóstico.
 @freezed
-class NetworkTargets with _$NetworkTargets {
+abstract class NetworkTargets with _$NetworkTargets {
   const factory NetworkTargets({
     required String googlePingTarget,
     required String ispPingTarget,
@@ -18,7 +18,7 @@ class NetworkTargets with _$NetworkTargets {
 /// Configuración global de la app obtenida del backend.
 /// Fuente: GET /v1/config  (CONFIG-1)
 @freezed
-class AppRemoteConfig with _$AppRemoteConfig {
+abstract class AppRemoteConfig with _$AppRemoteConfig {
   const factory AppRemoteConfig({
     required String assetsVersion,
     required String assetsCdnUrl,

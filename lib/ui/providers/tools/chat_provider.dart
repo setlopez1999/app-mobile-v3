@@ -7,7 +7,7 @@ import '../repositories/chat_repository.dart';
 part 'chat_provider.g.dart';
 
 @riverpod
-ChatRepository chatRepository(ChatRepositoryRef ref) {
+ChatRepository chatRepository(Ref ref) {
   return ChatRepository(apiClient: ref.watch(apiClientProvider));
 }
 

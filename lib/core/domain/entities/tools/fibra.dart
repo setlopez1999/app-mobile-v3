@@ -5,7 +5,7 @@ part 'fibra.g.dart';
 
 /// [estado] puede ser: "OK" | "FALLA" | "DEGRADADO"
 @freezed
-class Fibra with _$Fibra {
+abstract class Fibra with _$Fibra {
   const factory Fibra({
     required String potenciaDbm,
     required String estado,

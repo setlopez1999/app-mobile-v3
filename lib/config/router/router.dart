@@ -249,18 +249,15 @@ GoRouter appRouter(Ref ref) {
         path: '/tools/gaming/detail',
         name: GamingDetailScreen.name,
         builder: (_, state) {
-          final server = state.extra;
-          return GamingDetailScreen(servidor: server as dynamic);
+          final server = state.extra as String? ?? '';
+          return GamingDetailScreen(gameId: server);
         },
         pageBuilder: GoTransitions.cupertino,
       ),
       GoRoute(
         path: '/tools/gaming/streaming',
         name: GamingStreamingScreen.name,
-        builder: (_, state) {
-          final server = state.extra;
-          return GamingStreamingScreen(servidor: server as dynamic);
-        },
+        builder: (_, __) => const GamingStreamingScreen(),
         pageBuilder: GoTransitions.cupertino,
       ),
       /// Tools: Streaming
@@ -274,8 +271,8 @@ GoRouter appRouter(Ref ref) {
         path: '/tools/streaming/detail',
         name: StreamingDetailScreen.name,
         builder: (_, state) {
-          final platform = state.extra;
-          return StreamingDetailScreen(platform: platform as dynamic);
+          final platformId = state.extra as String? ?? '';
+          return StreamingDetailScreen(platformId: platformId);
         },
         pageBuilder: GoTransitions.cupertino,
       ),

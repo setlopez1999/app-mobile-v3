@@ -1,11 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:tvapp/core/constants/app_constants.dart';
+import 'package:tvapp/config/environment/environment.dart';
 import 'package:tvapp/core/services/tools/network_analyzer_service.dart';
 import '../../../core/services/local_device_service.dart';
 import 'package:tvapp/core/domain/entities/tools/diagnostico.dart';
 import 'package:tvapp/storage/tools/local_storage.dart';
 import 'diagnostico_providers.dart';
-import '../../fibra/logic/fibra_providers.dart';
+import 'fibra_providers.dart';
 
 enum DiagnosticoStep {
   idle,
@@ -82,18 +82,17 @@ class DiagnosticoState {
       );
 }
 
-class DiagnosticoNotifier extends StateNotifier<DiagnosticoState> {
-  final Ref _ref;
-
-  DiagnosticoNotifier(this._ref) : super(const DiagnosticoState());
+class DiagnosticoNotifier extends Notifier<DiagnosticoState> {
+  @override
+  DiagnosticoState build() => const DiagnosticoState();
 
   Future<void> iniciarDiagnostico() async {
     try {
       final googleTarget = LocalStorage.getGooglePingTarget() ?? '8.8.8.8';
       final ispTarget = LocalStorage.getIspPingTarget() ?? '1.1.1.1';
 
-      final networkService = _ref.read(networkAnalyzerServiceProvider);
-      final localDevice = _ref.read(localDeviceServiceProvider);
+      final networkService = ref.read(networkAnalyzerServiceProvider);
+      final localDevice = ref.read(localDeviceServiceProvider);
 
       state = state.copyWith(step: DiagnosticoStep.pingGoogle);
       final pingGoogle = await networkService.ping(googleTarget);
@@ -124,7 +123,7 @@ class DiagnosticoNotifier extends StateNotifier<DiagnosticoState> {
         wifiBanda: wifiInfo.band,
         wifiGateway: wifiInfo.gatewayAddress,
       );
-      final fibra = await _ref.read(fibraRepositoryProvider).getFibra();
+      final fibra = await ref.read(fibraRepositoryProvider).getFibra();
 
       state = state.copyWith(
         step: DiagnosticoStep.guardando,
@@ -133,7 +132,7 @@ class DiagnosticoNotifier extends StateNotifier<DiagnosticoState> {
       );
 
       final clienteId = LocalStorage.getClienteId() ?? '';
-      final result = await _ref.read(diagnosticoRepositoryProvider).saveDiagnostico(
+      final result = await ref.read(diagnosticoRepositoryProvider).saveDiagnostico(
             DiagnosticoRequest(
               clienteId: clienteId,
               latenciaGoogleMs: pingGoogle.avgMs.round(),
@@ -150,7 +149,7 @@ class DiagnosticoNotifier extends StateNotifier<DiagnosticoState> {
         resultadoFinal: result.resultado,
       );
 
-      _ref.invalidate(historialDiagnosticoProvider);
+      ref.invalidate(historialDiagnosticoProvider);
     } catch (e) {
       state = state.copyWith(step: DiagnosticoStep.error, errorMsg: e.toString());
     }
@@ -160,6 +159,6 @@ class DiagnosticoNotifier extends StateNotifier<DiagnosticoState> {
 }
 
 final diagnosticoNotifierProvider =
-    StateNotifierProvider<DiagnosticoNotifier, DiagnosticoState>(
-  (ref) => DiagnosticoNotifier(ref),
+    NotifierProvider<DiagnosticoNotifier, DiagnosticoState>(
+  DiagnosticoNotifier.new,
 );

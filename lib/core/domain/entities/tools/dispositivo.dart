@@ -4,7 +4,7 @@ part 'dispositivo.freezed.dart';
 part 'dispositivo.g.dart';
 
 @freezed
-class Dispositivo with _$Dispositivo {
+abstract class Dispositivo with _$Dispositivo {
   const factory Dispositivo({
     required String id,
     required String nombre,

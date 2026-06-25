@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tvapp/core/theme/app_colors.dart';
-import '../logic/dispositivos_providers.dart';
+import 'package:tvapp/ui/providers/tools/dispositivos_providers.dart';
 
 class DevicesScreen extends ConsumerWidget {
   static const String name = 'Devices';

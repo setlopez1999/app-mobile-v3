@@ -4,7 +4,7 @@ part 'diagnostico.freezed.dart';
 part 'diagnostico.g.dart';
 
 @freezed
-class Diagnostico with _$Diagnostico {
+abstract class Diagnostico with _$Diagnostico {
   const factory Diagnostico({
     required String id,
     required DateTime fecha,
@@ -17,7 +17,7 @@ class Diagnostico with _$Diagnostico {
 }
 
 @freezed
-class DiagnosticoRequest with _$DiagnosticoRequest {
+abstract class DiagnosticoRequest with _$DiagnosticoRequest {
   const factory DiagnosticoRequest({
     required String clienteId,
     required int latenciaGoogleMs,
@@ -33,7 +33,7 @@ class DiagnosticoRequest with _$DiagnosticoRequest {
 }
 
 @freezed
-class DiagnosticoSaveResult with _$DiagnosticoSaveResult {
+abstract class DiagnosticoSaveResult with _$DiagnosticoSaveResult {
   const factory DiagnosticoSaveResult({
     required bool success,
     required String diagnosticoId,

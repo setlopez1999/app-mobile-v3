@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:math';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:tvapp/core/services/tools/network_analyzer_service.dart';
-import '../providers/streaming_provider.dart';
+import 'streaming_provider.dart';
 
 part 'streaming_monitor_service.g.dart';
 

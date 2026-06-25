@@ -4,7 +4,7 @@ part 'chat_message.freezed.dart';
 part 'chat_message.g.dart';
 
 @freezed
-class ChatMessage with _$ChatMessage {
+abstract class ChatMessage with _$ChatMessage {
   const factory ChatMessage({
     required String text,
     required bool isUser,

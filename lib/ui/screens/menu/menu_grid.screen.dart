@@ -1,225 +1,409 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
-import 'package:tvapp/config/environment/environment.dart';
+import 'package:tvapp/ui/providers/auth/auth_provider.dart';
 import 'package:tvapp/ui/screens/home/home.screen.dart';
 import 'package:tvapp/ui/screens/tools/check_health/check_health_screen.dart';
-import 'package:tvapp/ui/screens/tools/gaming/gaming_screen.dart';
-import 'package:tvapp/ui/screens/tools/streaming/streaming_screen.dart';
-import 'package:tvapp/ui/screens/tools/dispositivos/devices_screen.dart';
-import 'package:tvapp/ui/screens/tools/asistencia/asistencia_loading_screen.dart';
 
 /// Pantalla principal post-login.
-/// Muestra un grid de acceso a los módulos principales de la app.
-class MenuGridScreen extends StatelessWidget {
+/// Grid de servicios: Eventos, IPTV, VOD, Cámaras, Club de descuentos, Check Health.
+class MenuGridScreen extends ConsumerStatefulWidget {
   const MenuGridScreen({super.key});
+
   static const String name = 'Menu Grid';
   static const String path = '/menu';
 
   @override
+  ConsumerState<MenuGridScreen> createState() => _MenuGridScreenState();
+}
+
+class _MenuGridScreenState extends ConsumerState<MenuGridScreen> {
+  int _currentBannerIndex = 0;
+  final PageController _bannerController = PageController();
+
+  @override
+  void dispose() {
+    _bannerController.dispose();
+    super.dispose();
+  }
+
+  void _showProfileSheet() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF1E1E32),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) => _ProfileSheet(
+        onLogout: () {
+          Navigator.pop(ctx);
+          _logout();
+        },
+      ),
+    );
+  }
+
+  void _logout() {
+    ref.read(authProvider.notifier).logout();
+    // El listener del router en router.dart redirige a /login
+    // cuando authProvider pasa a AuthState.initial()
+  }
+
+  @override
   Widget build(BuildContext context) {
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-    ]);
-
-    final items = _menuItems(context);
-
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0A0A),
+      backgroundColor: const Color(0xFF1E1E32),
       body: SafeArea(
-        child: Column(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 20),
+              _AppBar(onProfileTap: _showProfileSheet),
+              const SizedBox(height: 30),
+              const Text(
+                '¡Bienvenido!',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 20),
+              _BannerCarousel(
+                currentIndex: _currentBannerIndex,
+                controller: _bannerController,
+                onPageChanged: (i) => setState(() => _currentBannerIndex = i),
+              ),
+              const SizedBox(height: 30),
+              const Text(
+                'Mis productos',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 20),
+              _ServicesGrid(),
+              const SizedBox(height: 40),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Widgets privados ──────────────────────────────────────────────────────────
+
+class _AppBar extends StatelessWidget {
+  final VoidCallback onProfileTap;
+  const _AppBar({required this.onProfileTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        SvgPicture.asset(
+          'assets/hub/logo_oneplay.svg',
+          height: 25,
+          fit: BoxFit.contain,
+        ),
+        Row(
           children: [
-            _buildHeader(context),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: GridView.builder(
-                  itemCount: items.length,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 14,
-                    mainAxisSpacing: 14,
-                    childAspectRatio: 1.1,
+            Stack(
+              children: [
+                const Icon(Icons.notifications_none, color: Colors.white, size: 28),
+                Positioned(
+                  right: 4,
+                  top: 4,
+                  child: Container(
+                    width: 8,
+                    height: 8,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFFF4B55),
+                      shape: BoxShape.circle,
+                    ),
                   ),
-                  itemBuilder: (context, index) => _MenuCard(item: items[index]),
+                ),
+              ],
+            ),
+            const SizedBox(width: 20),
+            GestureDetector(
+              onTap: onProfileTap,
+              child: const CircleAvatar(
+                radius: 16,
+                backgroundColor: Color(0xFF32324A),
+                child: Icon(Icons.person_outline, color: Colors.white, size: 20),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _BannerCarousel extends StatelessWidget {
+  final int currentIndex;
+  final PageController controller;
+  final void Function(int) onPageChanged;
+
+  const _BannerCarousel({
+    required this.currentIndex,
+    required this.controller,
+    required this.onPageChanged,
+  });
+
+  static const _banners = [
+    'https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=2070&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=2071&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=2071&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=2070&auto=format&fit=crop',
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        SizedBox(
+          height: 160,
+          child: PageView.builder(
+            controller: controller,
+            onPageChanged: onPageChanged,
+            itemCount: _banners.length,
+            itemBuilder: (ctx, index) => Container(
+              margin: const EdgeInsets.symmetric(horizontal: 5),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                image: DecorationImage(
+                  image: NetworkImage(_banners[index]),
+                  fit: BoxFit.cover,
+                  colorFilter: ColorFilter.mode(
+                    Colors.black.withOpacity(0.2),
+                    BlendMode.darken,
+                  ),
                 ),
               ),
             ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(
+            _banners.length,
+            (index) => AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              margin: const EdgeInsets.symmetric(horizontal: 4),
+              width: currentIndex == index ? 24 : 8,
+              height: 8,
+              decoration: BoxDecoration(
+                color: currentIndex == index
+                    ? const Color(0xFF00D285)
+                    : Colors.white.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ServicesGrid extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return GridView.count(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      crossAxisCount: 2,
+      crossAxisSpacing: 15,
+      mainAxisSpacing: 15,
+      childAspectRatio: 0.85,
+      children: [
+        _HubServiceCard(
+          svgAsset: 'assets/hub/eventos.svg',
+          title: 'Eventos',
+          subtitle: 'Deportes, conciertos y mas...',
+          onTap: () {},
+        ),
+        _HubServiceCard(
+          svgAsset: 'assets/hub/tv.svg',
+          title: 'IPTV',
+          subtitle: 'Canales para todos',
+          onTap: () => context.goNamed(HomeScreen.name),
+        ),
+        _HubServiceCard(
+          svgAsset: 'assets/hub/play.svg',
+          title: 'VOD',
+          subtitle: 'Entretenimiento',
+          onTap: () {},
+        ),
+        _HubServiceCard(
+          svgAsset: 'assets/hub/shield_cam.svg',
+          title: 'Cámaras',
+          subtitle: 'Cuida tu hogar y a los tuyos',
+          onTap: () {},
+        ),
+        _HubServiceCard(
+          svgAsset: 'assets/hub/descuento.svg',
+          title: 'Club de descuentos',
+          subtitle: 'Restaurantes, tiendas y retail',
+          isNew: true,
+          onTap: () {},
+        ),
+        _HubServiceCard(
+          svgAsset: 'assets/hub/check_health_icon.svg',
+          title: 'Check Health',
+          subtitle: 'Revisa el estado de tu WIFI',
+          isHealth: true,
+          onTap: () => context.pushNamed(CheckHealthScreen.name),
+        ),
+      ],
+    );
+  }
+}
+
+class _HubServiceCard extends StatelessWidget {
+  final String svgAsset;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+  final bool isNew;
+  final bool isHealth;
+
+  const _HubServiceCard({
+    required this.svgAsset,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+    this.isNew = false,
+    this.isHealth = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(25),
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: const Color(0xFF2E2E42),
+          borderRadius: BorderRadius.circular(25),
+        ),
+        child: Stack(
+          children: [
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Center(
+                  child: SvgPicture.asset(
+                    svgAsset,
+                    width: 45,
+                    height: 45,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+                const SizedBox(height: 15),
+                Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Color(0xFFB0B0C3),
+                    fontSize: 10,
+                  ),
+                ),
+              ],
+            ),
+            if (isNew)
+              Positioned(
+                right: 0,
+                top: 0,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF00D285),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: const Text(
+                    'Nuevo',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
       ),
     );
   }
+}
 
-  Widget _buildHeader(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
-      child: Row(
+class _ProfileSheet extends StatelessWidget {
+  final VoidCallback onLogout;
+
+  const _ProfileSheet({required this.onLogout});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          SizedBox(
-            height: 36,
-            child: Image.asset(
-              Environment.appIcon,
-              fit: BoxFit.contain,
-              errorBuilder: (_, __, ___) => const SizedBox(),
+          Container(
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(2),
             ),
           ),
-          const SizedBox(width: 12),
-          const Expanded(
-            child: Text(
-              'Menú principal',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 0.3,
+          const SizedBox(height: 24),
+          const CircleAvatar(
+            radius: 36,
+            backgroundColor: Color(0xFF32324A),
+            child: Icon(Icons.person_outline, color: Colors.white, size: 36),
+          ),
+          const SizedBox(height: 28),
+          const Divider(color: Color(0xFF2E2E42), height: 1),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: TextButton.icon(
+              onPressed: onLogout,
+              icon: const Icon(Icons.logout, color: Color(0xFFFF4B55), size: 20),
+              label: const Text(
+                'Cerrar sesión',
+                style: TextStyle(
+                  color: Color(0xFFFF4B55),
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  List<_MenuItem> _menuItems(BuildContext context) => [
-    _MenuItem(
-      title: 'IPTV',
-      subtitle: 'Canales y contenido',
-      icon: Icons.tv_rounded,
-      gradient: const LinearGradient(
-        colors: [Color(0xFF1565C0), Color(0xFF0D47A1)],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ),
-      onTap: () => context.goNamed(HomeScreen.name),
-    ),
-    _MenuItem(
-      title: 'Check Health',
-      subtitle: 'Diagnóstico de red',
-      icon: Icons.wifi_tethering_rounded,
-      gradient: const LinearGradient(
-        colors: [Color(0xFF00CC66), Color(0xFF00BEB6)],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ),
-      onTap: () => context.pushNamed(CheckHealthScreen.name),
-    ),
-    _MenuItem(
-      title: 'Gaming',
-      subtitle: 'Servidores de juego',
-      icon: Icons.sports_esports_rounded,
-      gradient: const LinearGradient(
-        colors: [Color(0xFF6A1B9A), Color(0xFF4A148C)],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ),
-      onTap: () => context.pushNamed(GamingScreen.name),
-    ),
-    _MenuItem(
-      title: 'Streaming',
-      subtitle: 'Plataformas OTT',
-      icon: Icons.play_circle_fill_rounded,
-      gradient: const LinearGradient(
-        colors: [Color(0xFFE53935), Color(0xFFB71C1C)],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ),
-      onTap: () => context.pushNamed(StreamingScreen.name),
-    ),
-    _MenuItem(
-      title: 'Dispositivos',
-      subtitle: 'Red doméstica',
-      icon: Icons.devices_rounded,
-      gradient: const LinearGradient(
-        colors: [Color(0xFFF57C00), Color(0xFFE65100)],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ),
-      onTap: () => context.pushNamed(DevicesScreen.name),
-    ),
-    _MenuItem(
-      title: 'Asistencia',
-      subtitle: 'Soporte técnico',
-      icon: Icons.support_agent_rounded,
-      gradient: const LinearGradient(
-        colors: [Color(0xFF00838F), Color(0xFF006064)],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ),
-      onTap: () => context.pushNamed(AsistenciaLoadingScreen.name),
-    ),
-  ];
-}
-
-class _MenuItem {
-  final String title;
-  final String subtitle;
-  final IconData icon;
-  final Gradient gradient;
-  final VoidCallback onTap;
-
-  const _MenuItem({
-    required this.title,
-    required this.subtitle,
-    required this.icon,
-    required this.gradient,
-    required this.onTap,
-  });
-}
-
-class _MenuCard extends StatelessWidget {
-  final _MenuItem item;
-  const _MenuCard({required this.item});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: item.onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: item.gradient,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.35),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(18),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Icon(item.icon, color: Colors.white, size: 34),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    item.title,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 0.2,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    item.subtitle,
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.75),
-                      fontSize: 11,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }

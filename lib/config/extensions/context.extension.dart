@@ -1,13 +1,10 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:supercontext/supercontext.dart';
 import 'package:tvapp/config/theme/app.theme.dart';
-import 'package:tvapp/widgets/google_text.widget.dart';
+import 'package:tvapp/ui/shared/widgets/google_text.widget.dart';
 
-/// Context extension
 extension ContextExtension on BuildContext {
-  /// Info Dialog
   Future<T?> dialog<T>({
     Widget? icon,
     String? title,
@@ -15,9 +12,6 @@ extension ContextExtension on BuildContext {
     Widget? contentWidget,
     bool dimisible = true,
   }) async {
-    print(title);
-    print(content);
-
     return showDialog<T>(
       context: this,
       builder: (BuildContext context) {
@@ -30,25 +24,26 @@ extension ContextExtension on BuildContext {
               Container(
                 height: 300,
                 decoration: BoxDecoration(
-                  color: AppTheme.textColor(context).withOpacity(0.35),
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(4),
                   border: Border.all(
                     color: AppTheme.textColor(context),
                   ),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.all(32),
+                  padding: const EdgeInsets.all(16),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       if (icon != null) icon else const SizedBox.shrink(),
                       SizedBox(
-                        width: MediaQuery.of(context).size.width - 148,
+                        width: MediaQuery.of(context).size.width * 0.9,
                         child: GoogleTextWidget(
                           title ?? '',
                           textAlign: TextAlign.center,
                           style: const TextStyle(
-                            fontSize: 24,
+                            color: Colors.black,
+                            fontSize: 20,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
@@ -57,14 +52,16 @@ extension ContextExtension on BuildContext {
                         content ?? '',
                         textAlign: TextAlign.center,
                         style: const TextStyle(
-                          fontWeight: FontWeight.w700,
+                          color: Colors.black,
+                          fontWeight: FontWeight.w500,
+                          fontSize: 14
                         ),
                       ),
                       Visibility(
                         visible: dimisible,
                         child: FilledButton(
                           onPressed: context.pop,
-                          child: const Text('Cerrar'),
+                          child: const Text('Cerrar', style: TextStyle(color: Colors.white),),
                         ),
                       ),
                     ],

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tvapp/widgets/env.widget.dart';
+import 'package:tvapp/ui/shared/utils/env.dart';
 
 import '../environment/environment.dart';
 import 'colors.handler.dart';

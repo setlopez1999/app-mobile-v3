@@ -3,17 +3,10 @@ import 'package:go_transitions/go_transitions.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tvapp/config/environment/environment.dart';
 import 'package:tvapp/config/theme/colors.handler.dart';
-import 'package:tvapp/widgets/env.widget.dart';
+import 'package:tvapp/ui/shared/utils/env.dart';
 
 /// Light Theme
 final lightTheme = ThemeData(
-  pageTransitionsTheme: const PageTransitionsTheme(
-    builders: {
-      TargetPlatform.android: GoTransitions.cupertino,
-      TargetPlatform.iOS: GoTransitions.cupertino,
-      TargetPlatform.macOS: GoTransitions.cupertino,
-    },
-  ),
   colorScheme: ColorScheme.fromSwatch(
     primarySwatch: swatchColorFromHexString(env('LIGHT_THEME_COLOR')),
   ),
@@ -22,6 +15,9 @@ final lightTheme = ThemeData(
   filledButtonTheme: FilledButtonThemeData(
     style: FilledButton.styleFrom(
       minimumSize: const Size(128, 39),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
       backgroundColor: Environment.secondaryLightThemeColor,
       foregroundColor: Environment.secondaryLightThemeTextColor,
       textStyle: GoogleFonts.getFont(
@@ -38,24 +34,24 @@ final lightTheme = ThemeData(
       foregroundColor: Environment.lightThemeColorText,
     ),
   ),
+  fontFamily: GoogleFonts.getFont(Environment.googleFonts).fontFamily,
   inputDecorationTheme: InputDecorationTheme(
-    hintStyle: GoogleFonts.getFont(
-      Environment.googleFonts,
-      textStyle: TextStyle(
-        color: Environment.lightThemeColorText.withOpacity(0.75),
-      ),
+    hintStyle: TextStyle(
+      fontFamily: GoogleFonts.getFont(Environment.googleFonts).fontFamily,
+      // color: Environment.inputHintColor.withOpacity(0.8),
+      fontSize: 16,
+      fontWeight: FontWeight.w600,
     ),
+    filled: true,
+    // fillColor: Environment.inputFillColor,
+    contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
     border: OutlineInputBorder(
       borderRadius: BorderRadius.circular(4),
-      borderSide: BorderSide(
-        color: Environment.lightThemeColorText.withOpacity(0.75),
-      ),
+      borderSide: BorderSide.none,
     ),
     focusedBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(4),
-      borderSide: BorderSide(
-        color: Environment.secondaryLightThemeColor,
-      ),
+      borderSide: BorderSide(color: Colors.grey.shade600),
     ),
   ),
   checkboxTheme: CheckboxThemeData(
@@ -69,7 +65,14 @@ final lightTheme = ThemeData(
   ),
   textSelectionTheme: TextSelectionThemeData(
     cursorColor: Environment.secondaryLightThemeColor,
-    selectionColor: Environment.secondaryLightThemeColor,
-    selectionHandleColor: Environment.secondaryLightThemeColor,
+    // selectionColor: Environment.secondaryLightThemeColor,
+    // selectionHandleColor: Environment.secondaryLightThemeColor,
+  ),
+  pageTransitionsTheme: const PageTransitionsTheme(
+    builders: {
+      TargetPlatform.android: GoTransitions.cupertino,
+      TargetPlatform.iOS: GoTransitions.cupertino,
+      TargetPlatform.macOS: GoTransitions.cupertino,
+    },
   ),
 );

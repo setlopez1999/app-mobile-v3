@@ -1,331 +1,320 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:go_transitions/go_transitions.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:tvapp/domain/entities/channel.entity.dart';
-import 'package:tvapp/presentation/screens/channels/channel_details.screen.dart';
-import 'package:tvapp/presentation/screens/channels/channels.screen.dart';
-import 'package:tvapp/presentation/screens/channels/screens/guide.channels.screen.dart';
-import 'package:tvapp/presentation/screens/channels/screens/search.screen.dart';
-import 'package:tvapp/presentation/screens/favorites/screens/search-favorites.screen.dart';
-import 'package:tvapp/presentation/screens/home/home.screen.dart';
-import 'package:tvapp/presentation/screens/home/notifications/notifications.home.screen.dart';
-import 'package:tvapp/presentation/screens/initial_loader/initial_loader.screen.dart';
-import 'package:tvapp/presentation/screens/login/login.screen.dart';
-import 'package:tvapp/presentation/screens/menu/menu_grid.screen.dart';
-import 'package:tvapp/presentation/screens/my_account/change_password.my_account.screen.dart';
-import 'package:tvapp/presentation/screens/my_account/family_filter.my_account.screen.dart';
-import 'package:tvapp/presentation/screens/my_account/plan.my_account.screen.dart';
-import 'package:tvapp/presentation/screens/my_account/plans.my_account.screen.dart';
-import 'package:tvapp/presentation/screens/my_account/profile.my_account.screen.dart';
-import 'package:tvapp/presentation/screens/player/player.screen.dart';
-import 'package:tvapp/presentation/screens/privacy_policies/privacy_policies.screen.dart';
-import 'package:tvapp/presentation/screens/register/register-confirmation.screen.dart';
-import 'package:tvapp/presentation/screens/register/register.screen.dart';
-import 'package:tvapp/presentation/screens/terms_and_conditions/terms_and_conditions.screen.dart';
-// Tools (Check Health) screens
-import 'package:tvapp/presentation/screens/tools/check_health/check_health_screen.dart';
-import 'package:tvapp/presentation/screens/tools/diagnostico/diagnostico_screen.dart';
-import 'package:tvapp/presentation/screens/tools/diagnostico/diagnostico_result_screen.dart';
-import 'package:tvapp/presentation/screens/tools/gaming/gaming_screen.dart';
-import 'package:tvapp/presentation/screens/tools/gaming/gaming_detail_screen.dart';
-import 'package:tvapp/presentation/screens/tools/gaming/gaming_streaming_screen.dart';
-import 'package:tvapp/presentation/screens/tools/streaming/streaming_screen.dart';
-import 'package:tvapp/presentation/screens/tools/streaming/streaming_detail_screen.dart';
-import 'package:tvapp/presentation/screens/tools/chat/chat_screen.dart';
-import 'package:tvapp/presentation/screens/tools/dispositivos/devices_screen.dart';
-import 'package:tvapp/presentation/screens/tools/offline/offline_screen.dart';
-import 'package:tvapp/presentation/screens/tools/offline/offline_result_screen.dart';
-import 'package:tvapp/presentation/screens/tools/asistencia/asistencia_intro_screen.dart';
-import 'package:tvapp/presentation/screens/tools/asistencia/asistencia_loading_screen.dart';
-import 'package:tvapp/presentation/screens/tools/asistencia/asistencia_problem_screen.dart';
-import 'package:tvapp/presentation/screens/tools/asistencia/asistencia_success_screen.dart';
-import 'package:tvapp/presentation/screens/tools/historial/historial_screen.dart';
-import 'package:tvapp/providers/auth_state.dart';
+import 'package:supercontext/supercontext.dart';
+import 'package:tvapp/core/application/states/auth/auth_state.dart';
+import 'package:tvapp/core/application/states/system/connectivity_state.dart';
+import 'package:tvapp/core/shared/exceptions/app_exception.dart';
+import 'package:tvapp/ui/providers/auth/auth_provider.dart';
+import 'package:tvapp/ui/providers/connectivity/internet_check_provider.dart';
+import 'package:tvapp/ui/screens/change_password/change_password_screen.dart';
+import 'package:tvapp/ui/screens/family_filter/family_filter_screen.dart';
+import 'package:tvapp/ui/screens/guide/guide.screen.dart';
+import 'package:tvapp/ui/screens/home/home.screen.dart';
+import 'package:tvapp/ui/screens/initial_loader/initial_loader.screen.dart';
+import 'package:tvapp/ui/screens/login/login.screen.dart';
+import 'package:tvapp/ui/screens/no_internet/no_internet_screen.dart';
+import 'package:tvapp/ui/screens/notification_detail/notification_detail_screen.dart';
+import 'package:tvapp/ui/screens/notifications/notifications.screen.dart';
+import 'package:tvapp/ui/screens/plan/plan_screen.dart';
+import 'package:tvapp/ui/screens/player/player_screen.dart';
+import 'package:tvapp/ui/screens/privacy_policies/privacy_policies.screen.dart';
+import 'package:tvapp/ui/screens/profile/profile_screen.dart';
+import 'package:tvapp/ui/screens/register/register-confirmation.screen.dart';
+import 'package:tvapp/ui/screens/register/register.screen.dart';
+import 'package:tvapp/ui/screens/search/search.screen.dart';
+import 'package:tvapp/ui/screens/terms_and_conditions/terms_and_conditions.screen.dart';
 
+import 'package:tvapp/ui/screens/menu/menu_grid.screen.dart';
+import 'package:tvapp/ui/screens/tools/check_health/check_health_screen.dart';
+import 'package:tvapp/ui/screens/tools/diagnostico/diagnostico_screen.dart';
+import 'package:tvapp/ui/screens/tools/gaming/gaming_screen.dart';
+import 'package:tvapp/ui/screens/tools/gaming/gaming_detail_screen.dart';
+import 'package:tvapp/ui/screens/tools/gaming/gaming_streaming_screen.dart';
+import 'package:tvapp/ui/screens/tools/streaming/streaming_screen.dart';
+import 'package:tvapp/ui/screens/tools/streaming/streaming_detail_screen.dart';
+import 'package:tvapp/ui/screens/tools/chat/chat_screen.dart';
+import 'package:tvapp/ui/screens/tools/dispositivos/devices_screen.dart';
+import 'package:tvapp/ui/screens/tools/offline/offline_screen.dart';
+import 'package:tvapp/ui/screens/tools/asistencia/asistencia_loading_screen.dart';
 part 'router.g.dart';
 
 @riverpod
-GoRouter appRouter(AppRouterRef ref) {
-  final authStateNotifier = ValueNotifier(AuthState.unknown);
-  ref
-    ..onDispose(authStateNotifier.dispose)
-    ..listen(currentAuthStateProvider, (_, value) {
-      authStateNotifier.value = value;
-    });
+GoRouter appRouter(Ref ref) {
   final routerKey = GlobalKey<NavigatorState>(debugLabel: 'routerKey');
+
+  ref..listen(internetCheckProvider, (previous, next) {
+    if (next.hasValue) {
+      final isConnected = next.value?.isConnected;
+
+      if(isConnected != null && !isConnected) {
+        // Esperar un frame para asegurar que el contexto esté disponible
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          final context = routerKey.currentContext;
+          if (context != null) {
+            GoRouter.of(context).replaceNamed(NoInternetScreen.name);
+          }
+        });
+      }
+    }
+  })
+  ..listen(authProvider, (previous, next) {
+    next.whenOrNull(
+      initial: () {
+        routerKey.currentContext?.pushReplacementNamed(LoginScreen.name);
+      },
+      error: (AppException err) {
+        routerKey.currentContext?.pushReplacementNamed(LoginScreen.name);
+      }
+    );
+  });
+
 
   return GoRouter(
     navigatorKey: routerKey,
     debugLogDiagnostics: true,
     initialLocation: '/',
-    refreshListenable: authStateNotifier,
-    redirect: (_, state) {
-      final authState = ref.read(currentAuthStateProvider);
-
-      if (authState == AuthState.unknown && state.fullPath == '/') {
-        return null;
-      }
-      if (authState == AuthState.unknown) {
-        return '/';
-      }
-      if (!authState.allowedPaths.contains(state.fullPath)) {
-        return authState.redirectPath;
-      }
-      return null;
-    },
     routes: [
-      // ── Splash / Loader ──────────────────────────────────────────────────
       GoRoute(
         path: '/',
         name: InitialLoaderScreen.name,
-        builder: (_, __) => const InitialLoaderScreen(),
-        pageBuilder: GoTransitions.cupertino.call,
+        builder: (BuildContext context, GoRouterState state) {
+          return const InitialLoaderScreen();
+        },
+        pageBuilder: GoTransitions.cupertino
       ),
 
-      // ── Auth ─────────────────────────────────────────────────────────────
+      GoRoute(
+        path: '/no-internet',
+        name: NoInternetScreen.name,
+        builder: (BuildContext context, GoRouterState state) {
+          return const NoInternetScreen();
+        },
+        pageBuilder: GoTransitions.cupertino
+      ),
+
+      /// Login route
       GoRoute(
         path: '/login',
         name: LoginScreen.name,
         builder: (_, __) => const LoginScreen(),
-        pageBuilder: GoTransitions.cupertino.call,
+          pageBuilder: GoTransitions.cupertino
+
       ),
+
+      /// Register route
       GoRoute(
         path: '/register',
         name: RegisterScreen.name,
         builder: (_, __) => const RegisterScreen(),
-        pageBuilder: GoTransitions.cupertino.call,
+          pageBuilder: GoTransitions.cupertino
       ),
+      /// Register route
       GoRoute(
         path: '/register-confirmation',
         name: RegisterConfirmationScreen.name,
         builder: (_, __) => const RegisterConfirmationScreen(),
-        pageBuilder: GoTransitions.cupertino.call,
+          pageBuilder: GoTransitions.cupertino
       ),
+
+      /// Terms and conditions
       GoRoute(
         path: '/terms',
         name: TermsAndConditions.name,
         builder: (_, __) => const TermsAndConditions(),
-        pageBuilder: GoTransitions.cupertino.call,
+          pageBuilder: GoTransitions.cupertino
       ),
+
+      /// Privacy Policie
       GoRoute(
         path: '/policies',
         name: PrivacyPolicies.name,
         builder: (_, __) => const PrivacyPolicies(),
-        pageBuilder: GoTransitions.cupertino.call,
+          pageBuilder: GoTransitions.cupertino
       ),
 
-      // ── Menu principal (post-login) ───────────────────────────────────────
-      GoRoute(
-        path: MenuGridScreen.path,
-        name: MenuGridScreen.name,
-        builder: (_, __) => const MenuGridScreen(),
-        pageBuilder: GoTransitions.cupertino.call,
-      ),
-
-      // ── IPTV / Home de B ─────────────────────────────────────────────────
+      /// Home route
       GoRoute(
         path: '/home',
         name: HomeScreen.name,
         builder: (_, __) => const HomeScreen(),
-        pageBuilder: GoTransitions.cupertino.call,
+          pageBuilder: GoTransitions.cupertino
       ),
+
+      /// Notifications route
       GoRoute(
         path: '/notifications',
         name: NotificationsScreen.name,
         builder: (_, __) => const NotificationsScreen(),
-        pageBuilder: GoTransitions.cupertino.call,
+          pageBuilder: GoTransitions.cupertino
       ),
+
       GoRoute(
-        path: '/channels',
-        name: ChannelsScreen.name,
-        builder: (_, __) => const ChannelsScreen(),
-        pageBuilder: GoTransitions.cupertino.call,
+        path: '/notifications-detail',
+        name: NotificationDetailScreen.name,
+        builder: (_, __) => const NotificationDetailScreen(),
+          pageBuilder: GoTransitions.cupertino
       ),
-      GoRoute(
-        path: '/channel-details',
-        name: ChannelDetailsScreen.name,
-        builder: (_, state) {
-          final channel = state.extra as Channel;
-          return ChannelDetailsScreen(channel: channel);
-        },
-        pageBuilder: GoTransitions.cupertino.call,
-      ),
+
+      /// Channels Details route
       GoRoute(
         path: '/player',
         name: PlayerScreen.name,
-        builder: (_, state) {
-          final params = state.extra as Map<String, dynamic>;
-          return PlayerScreen(
-            channel: params['channel'],
-            channels: params['channels'],
-            categoryId: params['categoryId'],
-          );
-        },
-        pageBuilder: GoTransitions.cupertino.call,
+        builder: (_, __) => const PlayerScreen(),
+          pageBuilder: GoTransitions.cupertino
       ),
+
+      /// Search route
       GoRoute(
         path: '/search',
         name: SearchScreen.name,
-        builder: (_, __) => const SearchScreen(),
-        pageBuilder: GoTransitions.cupertino.call,
+        builder: (BuildContext context, GoRouterState state) {
+          return const SearchScreen();
+        },
+          pageBuilder: GoTransitions.cupertino
       ),
-      GoRoute(
-        path: '/search-favorites',
-        name: SearchFavoritesScreen.name,
-        builder: (_, __) => const SearchFavoritesScreen(),
-        pageBuilder: GoTransitions.cupertino.call,
-      ),
+
+      /// Tv guide route
       GoRoute(
         path: '/tv-guide',
         name: GuideScreen.name,
-        builder: (_, __) => const GuideScreen(),
-        pageBuilder: GoTransitions.cupertino.call,
+        builder: (BuildContext context, GoRouterState state) {
+          return const GuideScreen();
+        },
+          pageBuilder: GoTransitions.cupertino
       ),
+
+      /// Profile route
       GoRoute(
         path: '/profile',
         name: ProfileScreen.name,
-        builder: (_, __) => const ProfileScreen(),
-        pageBuilder: GoTransitions.cupertino.call,
+        builder: (BuildContext context, GoRouterState state) {
+          return const ProfileScreen();
+        },
+          pageBuilder: GoTransitions.cupertino
       ),
+
+      /// Plan route
       GoRoute(
         path: '/plan',
         name: PlanScreen.name,
-        builder: (_, __) => const PlanScreen(),
-        pageBuilder: GoTransitions.cupertino.call,
-      ),
-      GoRoute(
-        path: '/plans',
-        name: PlansScreen.name,
-        builder: (_, state) {
-          final params = state.extra as Map<String, dynamic>;
-          return PlansScreen(
-            currentPlanToRemoveFromPlans: params['currentPlanToRemoveFromPlans'],
-          );
+        builder: (BuildContext context, GoRouterState state) {
+          return const PlanScreen();
         },
-        pageBuilder: GoTransitions.cupertino.call,
+          pageBuilder: GoTransitions.cupertino
       ),
+
+      /// Change password route
       GoRoute(
         path: '/change-password',
         name: ChangePasswordScreen.name,
-        builder: (_, __) => const ChangePasswordScreen(),
-        pageBuilder: GoTransitions.cupertino.call,
+        builder: (BuildContext context, GoRouterState state) {
+          return const ChangePasswordScreen();
+        },
+          pageBuilder: GoTransitions.cupertino
       ),
+
+
+      /// Menu Grid - Hub post-login
+      GoRoute(
+        path: MenuGridScreen.path,
+        name: MenuGridScreen.name,
+        builder: (_, __) => const MenuGridScreen(),
+        pageBuilder: GoTransitions.cupertino,
+      ),
+      /// Tools: Check Health
+      GoRoute(
+        path: '/tools/check-health',
+        name: CheckHealthScreen.name,
+        builder: (_, __) => const CheckHealthScreen(),
+        pageBuilder: GoTransitions.cupertino,
+      ),
+      /// Tools: Diagnostico
+      GoRoute(
+        path: '/tools/diagnostico',
+        name: DiagnosticoScreen.name,
+        builder: (_, __) => const DiagnosticoScreen(),
+        pageBuilder: GoTransitions.cupertino,
+      ),
+      /// Tools: Gaming
+      GoRoute(
+        path: '/tools/gaming',
+        name: GamingScreen.name,
+        builder: (_, __) => const GamingScreen(),
+        pageBuilder: GoTransitions.cupertino,
+      ),
+      GoRoute(
+        path: '/tools/gaming/detail',
+        name: GamingDetailScreen.name,
+        builder: (_, state) {
+          final server = state.extra;
+          return GamingDetailScreen(servidor: server as dynamic);
+        },
+        pageBuilder: GoTransitions.cupertino,
+      ),
+      GoRoute(
+        path: '/tools/gaming/streaming',
+        name: GamingStreamingScreen.name,
+        builder: (_, state) {
+          final server = state.extra;
+          return GamingStreamingScreen(servidor: server as dynamic);
+        },
+        pageBuilder: GoTransitions.cupertino,
+      ),
+      /// Tools: Streaming
+      GoRoute(
+        path: '/tools/streaming',
+        name: StreamingScreen.name,
+        builder: (_, __) => const StreamingScreen(),
+        pageBuilder: GoTransitions.cupertino,
+      ),
+      GoRoute(
+        path: '/tools/streaming/detail',
+        name: StreamingDetailScreen.name,
+        builder: (_, state) {
+          final platform = state.extra;
+          return StreamingDetailScreen(platform: platform as dynamic);
+        },
+        pageBuilder: GoTransitions.cupertino,
+      ),
+      /// Tools: Chat
+      GoRoute(
+        path: '/tools/chat',
+        name: ChatScreen.name,
+        builder: (_, __) => const ChatScreen(),
+        pageBuilder: GoTransitions.cupertino,
+      ),
+      /// Tools: Dispositivos
+      GoRoute(
+        path: '/tools/devices',
+        name: DevicesScreen.name,
+        builder: (_, __) => const DevicesScreen(),
+        pageBuilder: GoTransitions.cupertino,
+      ),
+      /// Tools: Offline
+      GoRoute(
+        path: '/tools/offline',
+        name: OfflineScreen.name,
+        builder: (_, __) => const OfflineScreen(),
+        pageBuilder: GoTransitions.cupertino,
+      ),
+      /// Tools: Asistencia
+      GoRoute(
+        path: '/tools/asistencia',
+        name: AsistenciaLoadingScreen.name,
+        builder: (_, __) => const AsistenciaLoadingScreen(),
+        pageBuilder: GoTransitions.cupertino,
+      ),
+      /// Filter family route
       GoRoute(
         path: '/family-filter',
         name: FamilyFilterScreen.name,
-        builder: (_, __) => const FamilyFilterScreen(),
-        pageBuilder: GoTransitions.cupertino.call,
-      ),
-
-      // ── Tools — Check Health ──────────────────────────────────────────────
-      GoRoute(
-        path: '/tools/check-health',
-        name: 'CheckHealth',
-        builder: (_, __) => const CheckHealthScreen(),
-        pageBuilder: GoTransitions.cupertino.call,
-      ),
-      GoRoute(
-        path: '/tools/diagnostico',
-        name: 'Diagnostico',
-        builder: (_, __) => const DiagnosticoScreen(),
-        pageBuilder: GoTransitions.cupertino.call,
-      ),
-      GoRoute(
-        path: '/tools/diagnostico-result',
-        name: 'DiagnosticoResult',
-        builder: (_, __) => const DiagnosticoResultScreen(),
-        pageBuilder: GoTransitions.cupertino.call,
-      ),
-      GoRoute(
-        path: '/tools/gaming',
-        name: 'Gaming',
-        builder: (_, __) => const GamingScreen(),
-        pageBuilder: GoTransitions.cupertino.call,
-      ),
-      GoRoute(
-        path: '/tools/gaming-detail',
-        name: 'GamingDetail',
-        builder: (_, state) {
-          final gameId = state.extra as String? ?? '';
-          return GamingDetailScreen(gameId: gameId);
+        builder: (BuildContext context, GoRouterState state) {
+          return const FamilyFilterScreen();
         },
-        pageBuilder: GoTransitions.cupertino.call,
-      ),
-      GoRoute(
-        path: '/tools/gaming-streaming',
-        name: 'GamingStreaming',
-        builder: (_, __) => const GamingStreamingScreen(),
-        pageBuilder: GoTransitions.cupertino.call,
-      ),
-      GoRoute(
-        path: '/tools/streaming',
-        name: 'Streaming',
-        builder: (_, __) => const StreamingScreen(),
-        pageBuilder: GoTransitions.cupertino.call,
-      ),
-      GoRoute(
-        path: '/tools/streaming-detail',
-        name: 'StreamingDetail',
-        builder: (_, state) {
-          final platformId = state.extra as String? ?? '';
-          return StreamingDetailScreen(platformId: platformId);
-        },
-        pageBuilder: GoTransitions.cupertino.call,
-      ),
-      GoRoute(
-        path: '/tools/chat',
-        name: 'Chat',
-        builder: (_, __) => const ChatScreen(),
-        pageBuilder: GoTransitions.cupertino.call,
-      ),
-      GoRoute(
-        path: '/tools/dispositivos',
-        name: 'Dispositivos',
-        builder: (_, __) => const DevicesScreen(),
-        pageBuilder: GoTransitions.cupertino.call,
-      ),
-      GoRoute(
-        path: '/tools/offline',
-        name: 'Offline',
-        builder: (_, __) => const OfflineScreen(),
-        pageBuilder: GoTransitions.cupertino.call,
-      ),
-      GoRoute(
-        path: '/tools/offline-result',
-        name: 'OfflineResult',
-        builder: (_, __) => const OfflineResultScreen(),
-        pageBuilder: GoTransitions.cupertino.call,
-      ),
-      GoRoute(
-        path: '/tools/asistencia',
-        name: 'AsistenciaIntro',
-        builder: (_, __) => const AsistenciaIntroScreen(),
-        pageBuilder: GoTransitions.cupertino.call,
-      ),
-      GoRoute(
-        path: '/tools/asistencia-loading',
-        name: 'AsistenciaLoading',
-        builder: (_, __) => const AsistenciaLoadingScreen(),
-        pageBuilder: GoTransitions.cupertino.call,
-      ),
-      GoRoute(
-        path: '/tools/asistencia-problem',
-        name: 'AsistenciaProblem',
-        builder: (_, __) => const AsistenciaProblemScreen(),
-        pageBuilder: GoTransitions.cupertino.call,
-      ),
-      GoRoute(
-        path: '/tools/asistencia-success',
-        name: 'AsistenciaSuccess',
-        builder: (_, __) => const AsistenciaSuccessScreen(),
-        pageBuilder: GoTransitions.cupertino.call,
-      ),
-      GoRoute(
-        path: '/tools/historial',
-        name: 'Historial',
-        builder: (_, __) => const HistorialScreen(),
-        pageBuilder: GoTransitions.cupertino.call,
+          pageBuilder: GoTransitions.cupertino
       ),
     ],
   );

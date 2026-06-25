@@ -1,0 +1,23 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../data/repositories/i_gaming_repository.dart';
+import '../data/repositories/gaming_api_repository_impl.dart';
+import 'package:tvapp/core/domain/entities/tools/servidor_juego.dart';
+import '../../../core/providers/providers.dart';
+
+final gamingApiRepositoryImplProvider = Provider<GamingApiRepositoryImpl>((ref) {
+  final repo = GamingApiRepositoryImpl(ref.watch(apiClientProvider));
+  ref.onDispose(repo.dispose);
+  return repo;
+});
+
+final gamingApiRepositoryProvider = Provider<IGamingRepository>((ref) {
+  return ref.watch(gamingApiRepositoryImplProvider);
+});
+
+final servidoresJuegoProvider = FutureProvider<List<ServidorJuego>>((ref) async {
+  return ref.watch(gamingApiRepositoryProvider).getServidores();
+});
+
+final servidoresJuegoStreamProvider = StreamProvider<List<ServidorJuego>>((ref) {
+  return ref.watch(gamingApiRepositoryImplProvider).watchServidores();
+});

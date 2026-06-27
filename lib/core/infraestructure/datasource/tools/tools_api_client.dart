@@ -60,4 +60,16 @@ class ToolsApiClient {
       return null;
     }
   }
+
+  Future<Map<String, dynamic>> get(String path) async {
+    final d = await dio;
+    final response = await d.get(path);
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> post(String path, {Map<String, dynamic>? body}) async {
+    final d = await dio;
+    final response = await d.post(path, data: body);
+    return response.data as Map<String, dynamic>;
+  }
 }

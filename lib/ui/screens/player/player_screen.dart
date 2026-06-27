@@ -335,9 +335,11 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(10),
                   child: Image.network(
-                      stream!.channel.card,
+                    stream!.channel.card,
                     height: 150,
                     width: 150,
+                    errorBuilder: (context, error, stackTrace) =>
+                        const Icon(Icons.tv, size: 80, color: Colors.white),
                   ),
                 ),
               ],

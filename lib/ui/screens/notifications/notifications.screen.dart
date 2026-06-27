@@ -55,11 +55,8 @@ class NotificationsScreen extends ConsumerWidget {
                               height: 60,
                               width: 60,
                               fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) {
-                                return Image.network('https://cdn-icons-png.flaticon.com/512/4226/4226663.png', height: 50,
-                                  width: 50,
-                                  fit: BoxFit.cover);
-                              },
+                              errorBuilder: (context, error, stackTrace) =>
+                                  const Icon(Icons.notifications, size: 40),
                             ),
                           ),
                           title: Padding(

@@ -28,7 +28,9 @@ class _WelcomeSliderState extends ConsumerState<WelcomeSlider> {
               borderRadius: const BorderRadius.all(Radius.circular(12)),
               child: Image.network(item.imagen,
                   fit: BoxFit.cover,
-                  width: MediaQuery.of(context).size.width * 1)),
+                  width: MediaQuery.of(context).size.width * 1,
+                  errorBuilder: (context, error, stackTrace) =>
+                      const ColoredBox(color: Colors.black12, child: Center(child: Icon(Icons.broken_image, size: 40))))),
         ))
         .toList();
   }
@@ -79,6 +81,7 @@ class _WelcomeSliderState extends ConsumerState<WelcomeSlider> {
               items: getSliders(categories),
               carouselController: _controller,
               options: CarouselOptions(
+                  height: MediaQuery.of(context).size.height * 0.2,
                   viewportFraction: 0.9,
                   autoPlay: true,
                   padEnds: false,

@@ -30,11 +30,8 @@ class NotificationDetailScreen extends ConsumerWidget {
                 '${Environment.baseHost}/${notification.image_url}',
                 height: 200,
                 width: 200,
-                errorBuilder: (context, error, stackTrace) {
-                  return Image.network('https://cdn-icons-png.flaticon.com/512/4226/4226663.png', height: 50,
-                      width: 100,
-                      fit: BoxFit.cover);
-                },
+                errorBuilder: (context, error, stackTrace) =>
+                    const Icon(Icons.notifications, size: 80),
               ),
               const SizedBox(height: 32),
               GoogleTextWidget(

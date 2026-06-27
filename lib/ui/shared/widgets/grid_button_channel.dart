@@ -51,6 +51,8 @@ class _GridButtonChannelState extends ConsumerState<GridButtonChannel> {
                           width: 80,
                           height: 80,
                           fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                              const Icon(Icons.tv, size: 40),
                         ),
                       ),
                     ),

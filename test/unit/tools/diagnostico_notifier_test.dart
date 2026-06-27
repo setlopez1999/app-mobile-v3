@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tvapp/domain/entities/tools/diagnostico.dart';
+import 'package:tvapp/core/domain/entities/tools/diagnostico.dart';
 
 /// Tests unitarios para la lógica del modelo Diagnostico.
 /// No requieren Firebase ni red — validan la capa de datos pura.

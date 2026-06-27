@@ -22,6 +22,10 @@ class _FakeNetworkService implements NetworkAnalyzerService {
   });
 
   @override
+  Future<PingResult> analyze(String host, {int count = 4}) async =>
+      PingResult(avgPing: avgPingMs, lossPercent: 0, jitter: 1, success: true);
+
+  @override
   Future<PingResult> ping(String host, {int count = 4}) async =>
       PingResult(avgPing: avgPingMs, lossPercent: 0, jitter: 1, success: true);
 

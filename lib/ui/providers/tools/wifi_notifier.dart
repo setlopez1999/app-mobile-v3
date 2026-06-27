@@ -1,8 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../data/repositories/wifi_repository.dart';
-import '../data/repositories/wifi_repository_impl.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:tvapp/core/infraestructure/datasource/tools/tools_api_client.dart';
+import 'package:tvapp/core/infraestructure/repositories/tools/wifi_repository.dart';
+import 'package:tvapp/core/infraestructure/repositories/tools/wifi_repository_impl.dart';
 import 'package:tvapp/storage/tools/local_storage.dart';
-import '../../../core/providers/providers.dart';
+
+part 'wifi_notifier.g.dart';
 
 class WifiActionState {
   final bool isLoading;
@@ -19,16 +22,20 @@ class WifiActionState {
       );
 }
 
-class WifiNotifier extends StateNotifier<WifiActionState> {
-  final Ref _ref;
+final wifiRepositoryProvider = Provider<WifiRepository>((ref) {
+  return WifiRepositoryImpl(ToolsApiClient());
+});
 
-  WifiNotifier(this._ref) : super(const WifiActionState());
+@riverpod
+class WifiNotifier extends _$WifiNotifier {
+  @override
+  WifiActionState build() => const WifiActionState();
 
   Future<void> cambiarNombre(String nuevoNombre) async {
     state = state.copyWith(isLoading: true, errorMsg: null);
     try {
       final clienteId = LocalStorage.getClienteId() ?? '';
-      await _ref.read(wifiRepositoryProvider).cambiarNombre(clienteId, nuevoNombre);
+      await ref.read(wifiRepositoryProvider).cambiarNombre(clienteId, nuevoNombre);
       state = state.copyWith(isLoading: false, success: true);
     } catch (e) {
       state = state.copyWith(
@@ -43,7 +50,7 @@ class WifiNotifier extends StateNotifier<WifiActionState> {
     state = state.copyWith(isLoading: true, errorMsg: null);
     try {
       final clienteId = LocalStorage.getClienteId() ?? '';
-      await _ref.read(wifiRepositoryProvider).cambiarPassword(clienteId, nuevaPassword);
+      await ref.read(wifiRepositoryProvider).cambiarPassword(clienteId, nuevaPassword);
       state = state.copyWith(isLoading: false, success: true);
     } catch (e) {
       state = state.copyWith(
@@ -56,11 +63,3 @@ class WifiNotifier extends StateNotifier<WifiActionState> {
 
   void reset() => state = const WifiActionState();
 }
-
-final wifiRepositoryProvider = Provider<WifiRepository>((ref) {
-  return WifiRepositoryImpl(ref.read(apiClientProvider));
-});
-
-final wifiNotifierProvider = StateNotifierProvider<WifiNotifier, WifiActionState>(
-  (ref) => WifiNotifier(ref),
-);

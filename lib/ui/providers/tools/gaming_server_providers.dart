@@ -1,11 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../data/repositories/i_gaming_repository.dart';
-import '../data/repositories/gaming_api_repository_impl.dart';
+import 'package:tvapp/core/infraestructure/datasource/tools/tools_api_client.dart';
+import 'package:tvapp/core/infraestructure/repositories/tools/i_gaming_repository.dart';
+import 'package:tvapp/core/infraestructure/repositories/tools/gaming_api_repository_impl.dart';
 import 'package:tvapp/core/domain/entities/tools/servidor_juego.dart';
-import '../../../core/providers/providers.dart';
 
 final gamingApiRepositoryImplProvider = Provider<GamingApiRepositoryImpl>((ref) {
-  final repo = GamingApiRepositoryImpl(ref.watch(apiClientProvider));
+  final repo = GamingApiRepositoryImpl(ToolsApiClient());
   ref.onDispose(repo.dispose);
   return repo;
 });

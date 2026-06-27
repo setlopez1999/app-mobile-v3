@@ -81,7 +81,7 @@ class OfflineScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 40),
                 _ExecuteButton(
-                  onTap: () => context.push('/check_health/offline/result', extra: data),
+                  onTap: () => context.push('/tools/offline/result', extra: data),
                 ),
                 const SizedBox(height: 40),
               ],

@@ -1,14 +1,14 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '../../../core/providers/providers.dart';
+import 'package:tvapp/core/infraestructure/datasource/tools/tools_api_client.dart';
+import 'package:tvapp/core/infraestructure/repositories/tools/chat_repository.dart';
 import 'package:tvapp/storage/tools/local_storage.dart';
 import '../models/chat_message.dart';
-import '../repositories/chat_repository.dart';
 
 part 'chat_provider.g.dart';
 
 @riverpod
 ChatRepository chatRepository(Ref ref) {
-  return ChatRepository(apiClient: ref.watch(apiClientProvider));
+  return ChatRepository(apiClient: ToolsApiClient());
 }
 
 @riverpod

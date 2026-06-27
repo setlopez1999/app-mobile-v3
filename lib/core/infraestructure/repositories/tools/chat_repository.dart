@@ -18,10 +18,7 @@ class ChatRepository {
   }
 
   Future<Map<String, dynamic>> getHistory(String sessionId) async {
-    final data = await _api.get(
-      '/v1/chat/history',
-      queryParams: {'session_id': sessionId},
-    );
+    final data = await _api.get('/v1/chat/history?session_id=$sessionId');
     return data as Map<String, dynamic>;
   }
 

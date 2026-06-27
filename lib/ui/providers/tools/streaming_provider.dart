@@ -1,6 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:tvapp/core/domain/entities/tools/streaming_platform.dart';
-import '../repositories/streaming_repository.dart';
+import 'package:tvapp/core/infraestructure/repositories/tools/streaming_repository.dart';
 
 part 'streaming_provider.g.dart';
 

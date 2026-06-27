@@ -39,6 +39,7 @@ import 'package:tvapp/ui/screens/tools/chat/chat_screen.dart';
 import 'package:tvapp/ui/screens/tools/dispositivos/devices_screen.dart';
 import 'package:tvapp/ui/screens/tools/offline/offline_screen.dart';
 import 'package:tvapp/ui/screens/tools/asistencia/asistencia_loading_screen.dart';
+import 'package:tvapp/ui/screens/tools/offline/offline_result_screen.dart';
 part 'router.g.dart';
 
 @riverpod
@@ -302,6 +303,16 @@ GoRouter appRouter(Ref ref) {
         path: '/tools/asistencia',
         name: AsistenciaLoadingScreen.name,
         builder: (_, __) => const AsistenciaLoadingScreen(),
+        pageBuilder: GoTransitions.cupertino,
+      ),
+      /// Tools: Offline Result
+      GoRoute(
+        path: '/tools/offline/result',
+        name: OfflineResultScreen.name,
+        builder: (_, state) {
+          final data = state.extra as Map<String, dynamic>? ?? {};
+          return OfflineResultScreen(data: data);
+        },
         pageBuilder: GoTransitions.cupertino,
       ),
       /// Filter family route

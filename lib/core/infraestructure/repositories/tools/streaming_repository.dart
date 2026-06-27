@@ -1,5 +1,5 @@
 import 'dart:async';
-import '../models/streaming_platform.dart';
+import 'package:tvapp/core/domain/entities/tools/streaming_platform.dart';
 
 class StreamingRepository {
   final _platformsController =

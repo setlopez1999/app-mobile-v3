@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tvapp/domain/entities/tools/wifi_info.dart';
+import 'package:tvapp/core/domain/entities/tools/wifi_info.dart';
 
 /// Tests unitarios para WifiInfo y la lógica de análisis de red.
 /// No requieren red real — validan modelos y lógica de evaluación.

@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:tvapp/core/services/tools/network_analyzer_service.dart';
-import '../logic/gaming_server_providers.dart';
+import 'gaming_server_providers.dart';
 
 part 'gaming_monitor_service.g.dart';
 

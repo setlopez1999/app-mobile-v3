@@ -3,7 +3,7 @@ import 'package:tvapp/core/application/states/auth/auth_state.dart';
 import 'package:tvapp/core/application/states/content/content_state.dart';
 import 'package:tvapp/core/application/use_cases/content/get_welcome_use_case.dart';
 import 'package:tvapp/core/domain/entities/slides/slide_entity.dart';
-import 'package:tvapp/core/infraestructure/repositories/slide_http_repository.dart';
+import 'package:tvapp/core/providers/repository_providers.dart';
 import 'package:tvapp/ui/providers/auth/auth_provider.dart';
 
 part 'welcome_provider.g.dart';
@@ -17,8 +17,7 @@ class Welcome extends _$Welcome {
 
   Future<void> get() async {
     state = const ContentState.loading();
-    final repository = SlideHttpRepository();
-    final useCase = GetWelcomeUseCase(repository);
+    final useCase = GetWelcomeUseCase(ref.read(slideRepositoryProvider));
 
     await ref.read(authProvider).maybeWhen(
       success: (user) async {

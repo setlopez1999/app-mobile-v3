@@ -8,6 +8,7 @@ import 'package:tvapp/core/infraestructure/repositories/multicdn_http_repository
 import 'package:tvapp/core/infraestructure/repositories/notification_http_repository.dart';
 import 'package:tvapp/core/infraestructure/repositories/remember_repository.dart';
 import 'package:tvapp/core/infraestructure/repositories/settings_http_repository.dart';
+import 'package:tvapp/core/infraestructure/repositories/slide_http_repository.dart';
 import 'package:tvapp/core/infraestructure/repositories/top_channels_http_repository.dart';
 
 final authRepositoryProvider =
@@ -39,3 +40,6 @@ final settingsRepositoryProvider =
 
 final rememberRepositoryProvider =
     Provider<RememberRepository>((ref) => RememberRepository());
+
+final slideRepositoryProvider =
+    Provider<SlideHttpRepository>((ref) => SlideHttpRepository());

@@ -6,7 +6,7 @@ import 'package:tvapp/core/application/states/auth/auth_state.dart';
 import 'package:tvapp/core/application/states/content/content_state.dart';
 import 'package:tvapp/core/application/use_cases/notifications/get_notifications_use_case.dart';
 import 'package:tvapp/core/domain/entities/notification/notification_entity.dart';
-import 'package:tvapp/core/infraestructure/repositories/notification_http_repository.dart';
+import 'package:tvapp/core/providers/repository_providers.dart';
 import 'package:tvapp/ui/providers/auth/auth_provider.dart';
 import 'package:tvapp/ui/providers/connectivity/internet_check_provider.dart';
 
@@ -56,8 +56,7 @@ class Notifications extends _$Notifications {
 
     if (user == null) return;
 
-    final repository = NotificationHttpRepository();
-    final useCase = GetNotificationsUseCase(repository);
+    final useCase = GetNotificationsUseCase(ref.read(notificationRepositoryProvider));
 
     final result = await useCase.execute(user.us_id);
 

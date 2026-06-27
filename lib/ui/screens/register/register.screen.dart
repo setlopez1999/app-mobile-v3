@@ -3,11 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tvapp/config/extensions/context.extension.dart';
 import 'package:tvapp/config/theme/app.theme.dart';
-import 'package:tvapp/core/application/use_cases/auth/register_user_use_case.dart';
-import 'package:tvapp/core/application/use_cases/settings/get_settings_use_case.dart';
 import 'package:tvapp/core/infraestructure/dtos/register_dto/register_user_dto.dart';
-import 'package:tvapp/core/infraestructure/repositories/auth_http_repository.dart';
-import 'package:tvapp/core/infraestructure/repositories/settings_http_repository.dart';
+import 'package:tvapp/ui/providers/register/register_notifier.dart';
 import 'package:tvapp/ui/screens/register/register-confirmation.screen.dart';
 import 'package:tvapp/ui/screens/register/wigdets/location_data.register_from.widget.dart';
 import 'package:tvapp/ui/screens/register/wigdets/personal_data.register_form.widget.dart';
@@ -38,6 +35,17 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(registerProvider, (_, next) {
+      if (next is RegisterSuccess) {
+        context.pushReplacementNamed(RegisterConfirmationScreen.name);
+      } else if (next is RegisterError) {
+        context.dialog(
+          icon: Icon(Icons.dangerous, color: AppTheme.secondaryColor(context), size: 48),
+          title: 'Error',
+          content: next.error.message,
+        );
+      }
+    });
     return Scaffold(
       appBar: customAppBar(
         context,
@@ -79,53 +87,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
               bool acceptTerms = false,
               bool acceptPolicies = false,
             }) async {
-
-              final settingsRepository = SettingsHttpRepository();
-              final settingsResult = await GetSettingsUseCase(settingsRepository).execute();
-
-              await settingsResult.fold(
-                  (error) {
-                    context.dialog(
-                        icon: Icon(
-                          Icons.dangerous,
-                          color: AppTheme.secondaryColor(context),
-                          size: 48,
-                        ),
-                        title: 'Error',
-                        content: error.message
-                    );
-                  },
-                  (settings) async {
-                    final authRepository = AuthHttpRepository();
-                    final registerResult = await RegisterUserUseCase(authRepository).execute(
-                      settings: settings,
-                      acceptPolicies: acceptPolicies,
-                      acceptTerms: acceptTerms,
-                      departmentCode: departmentCode,
-                      districtCode: districtCode,
-                      params: _personalData!,
-                      provinceCode: provinceCode,
-                    );
-
-                    registerResult.fold(
-                      (error){
-                        context.dialog(
-                            icon: Icon(
-                              Icons.dangerous,
-                              color: AppTheme.secondaryColor(context),
-                              size: 48,
-                            ),
-                            title: 'Error',
-                            content: error.message
-                        );
-                      },
-                      (result){
-                        context.pushReplacementNamed(RegisterConfirmationScreen.name);
-                      }
-                    );
-                  }
+              await ref.read(registerProvider.notifier).submit(
+                personalData: _personalData!,
+                departmentCode: departmentCode,
+                provinceCode: provinceCode,
+                districtCode: districtCode,
+                acceptTerms: acceptTerms,
+                acceptPolicies: acceptPolicies,
               );
-
             },
           ),
         ],

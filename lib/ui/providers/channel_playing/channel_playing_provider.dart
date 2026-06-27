@@ -6,8 +6,7 @@ import 'package:tvapp/core/application/use_cases/auth/get_session_use_case.dart'
 import 'package:tvapp/core/application/use_cases/content/get_stream_use_case.dart';
 import 'package:tvapp/core/domain/entities/channel/channel_entity.dart';
 import 'package:tvapp/core/domain/entities/stream/stream_entity.dart';
-import 'package:tvapp/core/infraestructure/repositories/auth_http_repository.dart';
-import 'package:tvapp/core/infraestructure/repositories/channels_http_repository.dart';
+import 'package:tvapp/core/providers/repository_providers.dart';
 import 'package:tvapp/ui/providers/category_selected/category_selected_provider.dart';
 import 'package:tvapp/ui/providers/channels_loaded/channels_loaded_provider.dart';
 import 'package:tvapp/ui/providers/multicdn/multicdn_provider.dart';
@@ -24,10 +23,9 @@ class ChannelPlaying extends _$ChannelPlaying {
     if(!silent) {
       state = const ContentState.loading();
     }
-    final channelsRepository = ChannelsHttpRepository();
+    final channelsRepository = ref.read(channelsRepositoryProvider);
     final getStreamUseCase = GetStreamUseCase(channelsRepository);
-    final authRepository = AuthHttpRepository();
-    final sessionUseCase = GetSessionUseCase(authRepository);
+    final sessionUseCase = GetSessionUseCase(ref.read(authRepositoryProvider));
 
     final session = await sessionUseCase.execute();
     String multiCdnUrl = '';
@@ -127,7 +125,7 @@ class ChannelPlaying extends _$ChannelPlaying {
       }
 
       // Get session token
-      final sessionResult = await GetSessionUseCase(AuthHttpRepository()).execute();
+      final sessionResult = await GetSessionUseCase(ref.read(authRepositoryProvider)).execute();
       final token = sessionResult.getRight().fold(
             () => '',
             (session) => session.token,
@@ -148,7 +146,7 @@ class ChannelPlaying extends _$ChannelPlaying {
       }
 
       // Get new stream data
-      final newStreamResult = await GetStreamUseCase(ChannelsHttpRepository())
+      final newStreamResult = await GetStreamUseCase(ref.read(channelsRepositoryProvider))
           .execute(token, currentStream.channel, multiCdnUrl);
 
       return newStreamResult.fold(

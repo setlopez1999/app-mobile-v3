@@ -2,7 +2,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:tvapp/core/application/states/content/content_state.dart';
 import 'package:tvapp/core/application/use_cases/location/get_provinces_use_case.dart';
 import 'package:tvapp/core/domain/entities/location/location.entity.dart';
-import 'package:tvapp/core/infraestructure/repositories/location_http_repository.dart';
+import 'package:tvapp/core/providers/repository_providers.dart';
 
 part 'provinces_provider.g.dart';
 
@@ -16,8 +16,7 @@ class Provinces extends _$Provinces {
   }
 
   Future<void> change(String departmentCode) async {
-    final repository = LocationHttpRepository();
-    final useCase = GetProvincesUseCase(repository);
+    final useCase = GetProvincesUseCase(ref.read(locationRepositoryProvider));
 
     state = const ContentState.loading();
 

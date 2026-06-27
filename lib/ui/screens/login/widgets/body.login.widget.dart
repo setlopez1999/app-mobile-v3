@@ -5,8 +5,7 @@ import 'package:tvapp/config/environment/environment.dart';
 import 'package:tvapp/config/extensions/context.extension.dart';
 import 'package:tvapp/config/theme/app.theme.dart';
 import 'package:tvapp/core/application/states/auth/auth_state.dart';
-import 'package:tvapp/core/infraestructure/repositories/auth_http_repository.dart';
-import 'package:tvapp/core/infraestructure/repositories/remember_repository.dart';
+import 'package:tvapp/core/providers/repository_providers.dart';
 import 'package:tvapp/ui/providers/auth/auth_provider.dart';
 import 'package:tvapp/ui/screens/change_password/change_password_screen.dart';
 import 'package:tvapp/ui/screens/home/home.screen.dart';
@@ -34,12 +33,9 @@ class _BodyWidgetState extends ConsumerState<BodyWidget> {
   final userController = TextEditingController();
   final passController = TextEditingController();
 
-  final repository = RememberRepository();
-
-
   @override
   void initState() {
-    repository.getRemember().then((str) {
+    ref.read(rememberRepositoryProvider).getRemember().then((str) {
       if(str == '') {
         return;
       }
@@ -206,10 +202,10 @@ class _BodyWidgetState extends ConsumerState<BodyWidget> {
                                     success: (user) async {
 
                                       if(_checkRemember) {
-                                        await repository.setRemember(userController.text, passController.text);
+                                        await ref.read(rememberRepositoryProvider).setRemember(userController.text, passController.text);
                                       }
                                       else {
-                                        await repository.cleanRemember();
+                                        await ref.read(rememberRepositoryProvider).cleanRemember();
                                       }
 
                                       ref.read(authProvider.notifier).saveSession(userController.text);

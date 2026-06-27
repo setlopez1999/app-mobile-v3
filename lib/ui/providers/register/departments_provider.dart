@@ -2,7 +2,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:tvapp/core/application/states/content/content_state.dart';
 import 'package:tvapp/core/application/use_cases/location/get_departments_use_case.dart';
 import 'package:tvapp/core/domain/entities/location/location.entity.dart';
-import 'package:tvapp/core/infraestructure/repositories/location_http_repository.dart';
+import 'package:tvapp/core/providers/repository_providers.dart';
 
 part 'departments_provider.g.dart';
 
@@ -15,8 +15,7 @@ class Departments extends _$Departments {
   }
 
   Future<void> getDepartments() async {
-    final repository = LocationHttpRepository();
-    final useCase = GetDepartmentsUseCase(repository);
+    final useCase = GetDepartmentsUseCase(ref.read(locationRepositoryProvider));
     final result = await useCase.execute();
     result.fold(
       (err) => state = ContentState.error(err),

@@ -3,8 +3,7 @@ import 'package:tvapp/core/application/states/content/content_state.dart';
 import 'package:tvapp/core/application/use_cases/auth/get_session_use_case.dart';
 import 'package:tvapp/core/application/use_cases/content/get_guide_use_case.dart';
 import 'package:tvapp/core/domain/entities/channel/channel_entity.dart';
-import 'package:tvapp/core/infraestructure/repositories/auth_http_repository.dart';
-import 'package:tvapp/core/infraestructure/repositories/guide_http_repository.dart';
+import 'package:tvapp/core/providers/repository_providers.dart';
 
 part 'guide_provider.g.dart';
 
@@ -17,10 +16,8 @@ class Guide extends _$Guide {
 
   Future<void> get() async {
     state = const ContentState.loading();
-    final repository = GuideHttpRepository();
-    final useCase = GetGuideUseCase(repository);
-    final authRepository = AuthHttpRepository();
-    final sessionUsecase = GetSessionUseCase(authRepository);
+    final useCase = GetGuideUseCase(ref.read(guideRepositoryProvider));
+    final sessionUsecase = GetSessionUseCase(ref.read(authRepositoryProvider));
 
     final session = await sessionUsecase.execute();
 

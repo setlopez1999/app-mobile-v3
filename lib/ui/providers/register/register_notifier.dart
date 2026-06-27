@@ -2,8 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tvapp/core/application/use_cases/auth/register_user_use_case.dart';
 import 'package:tvapp/core/application/use_cases/settings/get_settings_use_case.dart';
 import 'package:tvapp/core/infraestructure/dtos/register_dto/register_user_dto.dart';
-import 'package:tvapp/core/infraestructure/repositories/auth_http_repository.dart';
-import 'package:tvapp/core/infraestructure/repositories/settings_http_repository.dart';
+import 'package:tvapp/core/providers/repository_providers.dart';
 import 'package:tvapp/core/shared/exceptions/app_exception.dart';
 
 sealed class RegisterState {
@@ -41,12 +40,12 @@ class RegisterNotifier extends Notifier<RegisterState> {
   }) async {
     state = const RegisterLoading();
 
-    final settingsResult = await GetSettingsUseCase(SettingsHttpRepository()).execute();
+    final settingsResult = await GetSettingsUseCase(ref.read(settingsRepositoryProvider)).execute();
 
     await settingsResult.fold(
       (error) async => state = RegisterError(error),
       (settings) async {
-        final result = await RegisterUserUseCase(AuthHttpRepository()).execute(
+        final result = await RegisterUserUseCase(ref.read(authRepositoryProvider)).execute(
           settings: settings,
           params: personalData,
           departmentCode: departmentCode,

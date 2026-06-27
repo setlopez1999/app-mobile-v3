@@ -7,7 +7,7 @@ import 'package:tvapp/core/application/use_cases/notifications/get_notifymes_use
 import 'package:tvapp/core/domain/entities/epg/epg_entity.dart';
 import 'package:tvapp/core/domain/entities/notifyme/notifyme_entity.dart';
 import 'package:tvapp/core/domain/entities/stream/stream_entity.dart';
-import 'package:tvapp/core/infraestructure/repositories/notification_http_repository.dart';
+import 'package:tvapp/core/providers/repository_providers.dart';
 import 'package:tvapp/ui/providers/auth/auth_provider.dart';
 
 part 'notifyme_provider.g.dart';
@@ -24,8 +24,7 @@ class NotifyMe extends _$NotifyMe {
   }
 
   Future<void> createNotification(StreamEntity stream, Epg epg) async {
-    final repository = NotificationHttpRepository();
-    final useCase = CreateNotifymeUseCase(repository);
+    final useCase = CreateNotifymeUseCase(ref.read(notificationRepositoryProvider));
 
     await ref.read(authProvider)
         .maybeWhen(
@@ -49,8 +48,7 @@ class NotifyMe extends _$NotifyMe {
   }
 
   Future<void> getNotifications() async {
-    final repository = NotificationHttpRepository();
-    final useCase = GetNotifymesUseCase(repository);
+    final useCase = GetNotifymesUseCase(ref.read(notificationRepositoryProvider));
 
     final result = await useCase.execute();
 

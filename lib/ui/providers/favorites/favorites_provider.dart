@@ -7,8 +7,7 @@ import 'package:tvapp/core/application/use_cases/content/get_favorites_use_case.
 import 'package:tvapp/core/application/use_cases/content/set_favorite_use_case.dart';
 import 'package:tvapp/core/domain/entities/channel/channel_entity.dart';
 import 'package:tvapp/core/domain/entities/sensitive_data/sensitive_data_entity.dart';
-import 'package:tvapp/core/infraestructure/repositories/auth_http_repository.dart';
-import 'package:tvapp/core/infraestructure/repositories/channels_http_repository.dart';
+import 'package:tvapp/core/providers/repository_providers.dart';
 
 part 'favorites_provider.g.dart';
 
@@ -23,10 +22,9 @@ class Favorites extends _$Favorites {
     if (!silent) {
       state = const ContentState.loading();
     }
-    final repository = ChannelsHttpRepository();
-    final useCase = GetFavoritesUseCase(repository);
-    final authRepository = AuthHttpRepository();
-    final sessionUsecase = GetSessionUseCase(authRepository);
+    final channelsRepo = ref.read(channelsRepositoryProvider);
+    final useCase = GetFavoritesUseCase(channelsRepo);
+    final sessionUsecase = GetSessionUseCase(ref.read(authRepositoryProvider));
 
     final session = await sessionUsecase.execute();
 
@@ -47,9 +45,8 @@ class Favorites extends _$Favorites {
   }
 
   Future<void> toggleFavorite(Channel channel) async {
-    final channelsRepository = ChannelsHttpRepository();
-    final authRepository = AuthHttpRepository();
-    final sessionUseCase = GetSessionUseCase(authRepository);
+    final channelsRepository = ref.read(channelsRepositoryProvider);
+    final sessionUseCase = GetSessionUseCase(ref.read(authRepositoryProvider));
     final setFavorite = SetFavoriteUseCase(channelsRepository);
     final deleteFavorite = DeleteFavoriteUseCase(channelsRepository);
     final session = await sessionUseCase.execute();

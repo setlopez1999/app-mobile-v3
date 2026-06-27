@@ -5,8 +5,7 @@ import 'package:tvapp/core/application/use_cases/auth/get_session_use_case.dart'
 import 'package:tvapp/core/application/use_cases/content/get_all_channels_use_case.dart';
 import 'package:tvapp/core/application/use_cases/content/get_favorites_use_case.dart';
 import 'package:tvapp/core/domain/entities/channel/channel_entity.dart';
-import 'package:tvapp/core/infraestructure/repositories/auth_http_repository.dart';
-import 'package:tvapp/core/infraestructure/repositories/channels_http_repository.dart';
+import 'package:tvapp/core/providers/repository_providers.dart';
 import 'package:tvapp/ui/providers/auth/auth_provider.dart';
 
 part 'channels_searched_provider.g.dart';
@@ -20,13 +19,12 @@ class ChannelsSearched extends _$ChannelsSearched {
 
   Future<void> get({bool favorites = false}) async {
     state = const ContentState.loading();
-    final repository = ChannelsHttpRepository();
-    final useCase = GetAllChannelsUseCase(repository);
-    final favoritesUseCase = GetFavoritesUseCase(repository);
+    final channelsRepo = ref.read(channelsRepositoryProvider);
+    final useCase = GetAllChannelsUseCase(channelsRepo);
+    final favoritesUseCase = GetFavoritesUseCase(channelsRepo);
 
     if(favorites) {
-      final authRepository = AuthHttpRepository();
-      final sessionUsecase = GetSessionUseCase(authRepository);
+      final sessionUsecase = GetSessionUseCase(ref.read(authRepositoryProvider));
 
       final session = await sessionUsecase.execute();
 

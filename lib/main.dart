@@ -11,12 +11,14 @@ import 'package:tvapp/ui/providers/multicdn/multicdn_provider.dart';
 import 'package:tvapp/ui/providers/notification/notifications_provider.dart';
 
 import 'config/error_handler/error_handler.dart';
+import 'package:tvapp/storage/tools/local_storage.dart';
 
 
 Future<void> main() async {
   // enableFlutterDriverExtension();
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load();
+  await LocalStorage.init();
   
   runApp(
     ProviderScope(

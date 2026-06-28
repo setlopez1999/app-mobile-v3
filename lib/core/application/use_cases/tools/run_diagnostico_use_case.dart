@@ -77,21 +77,27 @@ class RunDiagnosticoUseCase {
   Future<RunDiagnosticoResult> execute(
     RunDiagnosticoInput input, {
     void Function(DiagnosticoProgress step)? onProgress,
+    void Function(DiagnosticoProgress step, dynamic value)? onStepResult,
   }) async {
     onProgress?.call(DiagnosticoProgress.pingGoogle);
     final pingGoogle = await _networkService.ping(input.googleTarget);
+    onStepResult?.call(DiagnosticoProgress.pingGoogle, pingGoogle.avgMs.round());
 
     onProgress?.call(DiagnosticoProgress.pingIsp);
     final pingIsp = await _networkService.ping(input.ispTarget);
+    onStepResult?.call(DiagnosticoProgress.pingIsp, pingIsp.avgMs.round());
 
     onProgress?.call(DiagnosticoProgress.speedtest);
     final speed = await _networkService.runSpeedTest(serverBaseUrl: input.serverBaseUrl);
+    onStepResult?.call(DiagnosticoProgress.speedtest, speed);
 
     onProgress?.call(DiagnosticoProgress.wifiInfo);
     final wifiInfo = await _localDeviceService.getWifiInfo();
+    onStepResult?.call(DiagnosticoProgress.wifiInfo, wifiInfo);
 
     onProgress?.call(DiagnosticoProgress.fibra);
     final fibra = await _fibraRepo.getFibra();
+    onStepResult?.call(DiagnosticoProgress.fibra, fibra);
 
     onProgress?.call(DiagnosticoProgress.guardando);
     final result = await _diagnosticoRepo.saveDiagnostico(

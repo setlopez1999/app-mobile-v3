@@ -30,6 +30,7 @@ import 'package:tvapp/ui/screens/terms_and_conditions/terms_and_conditions.scree
 import 'package:tvapp/ui/screens/menu/menu_grid.screen.dart';
 import 'package:tvapp/ui/screens/tools/check_health/check_health_screen.dart';
 import 'package:tvapp/ui/screens/tools/diagnostico/diagnostico_screen.dart';
+import 'package:tvapp/ui/screens/tools/diagnostico/diagnostico_result_screen.dart';
 import 'package:tvapp/ui/screens/tools/gaming/gaming_screen.dart';
 import 'package:tvapp/ui/screens/tools/gaming/gaming_detail_screen.dart';
 import 'package:tvapp/ui/screens/tools/gaming/gaming_streaming_screen.dart';
@@ -237,6 +238,13 @@ GoRouter appRouter(Ref ref) {
         path: '/tools/diagnostico',
         name: DiagnosticoScreen.name,
         builder: (_, __) => const DiagnosticoScreen(),
+        pageBuilder: GoTransitions.cupertino,
+      ),
+      /// Tools: Diagnostico Result
+      GoRoute(
+        path: '/check_health/diagnostico_result',
+        name: DiagnosticoResultScreen.name,
+        builder: (_, __) => const DiagnosticoResultScreen(),
         pageBuilder: GoTransitions.cupertino,
       ),
       /// Tools: Gaming

@@ -49,7 +49,7 @@ class _GamingDetailScreenState extends ConsumerState<GamingDetailScreen>
 
   @override
   Widget build(BuildContext context) {
-    final servidoresAsync = ref.watch(servidoresJuegoStreamProvider);
+    final servidoresAsync = ref.watch(servidoresJuegoProvider);
 
     return servidoresAsync.when(
       loading: () => Scaffold(

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tvapp/core/infraestructure/datasource/tools/tools_api_client.dart';
 import 'package:tvapp/core/infraestructure/repositories/tools/i_gaming_repository.dart';
@@ -15,6 +16,10 @@ final gamingApiRepositoryProvider = Provider<IGamingRepository>((ref) {
 });
 
 final servidoresJuegoProvider = FutureProvider<List<ServidorJuego>>((ref) async {
+  final timer = Timer.periodic(const Duration(seconds: 10), (_) {
+    ref.invalidateSelf();
+  });
+  ref.onDispose(timer.cancel);
   return ref.watch(gamingApiRepositoryProvider).getServidores();
 });
 

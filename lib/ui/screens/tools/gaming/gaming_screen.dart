@@ -84,7 +84,7 @@ class GamingScreen extends ConsumerWidget {
             servidoresAsync.when(
               data: (servidores) => _GamesListCard(
                 servidores: servidores,
-                onGameTap: (sv) => context.push('/tools/gaming/detail', extra: _gameNameToId(sv.juego)),
+                onGameTap: (sv) => context.push('/tools/gaming/detail', extra: sv.id),
                 logoForJuego: _logoForJuego,
                 colorForEstado: _colorForEstado,
               ),

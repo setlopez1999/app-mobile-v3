@@ -21,14 +21,14 @@ class GamingScreen extends ConsumerWidget {
     return name;
   }
 
-  String _logoForJuego(String juego) {
+  String? _logoForJuego(String juego) {
     final lower = juego.toLowerCase();
     if (lower.contains('counter strike') || lower.contains('cs')) return AppAssets.logoCs2;
     if (lower.contains('dota')) return AppAssets.logoDota2;
     if (lower.contains('fortnite')) return AppAssets.logoFortnite;
     if (lower.contains('valorant')) return AppAssets.logoValorant;
     if (lower.contains('pubg')) return AppAssets.logoPubg;
-    return AppAssets.logoValorant;
+    return null;
   }
 
   Color _colorForEstado(String estado) {
@@ -105,7 +105,7 @@ class GamingScreen extends ConsumerWidget {
 class _GamesListCard extends StatelessWidget {
   final List<ServidorJuego> servidores;
   final void Function(ServidorJuego) onGameTap;
-  final String Function(String) logoForJuego;
+  final String? Function(String) logoForJuego;
   final Color Function(String) colorForEstado;
 
   const _GamesListCard({
@@ -133,6 +133,7 @@ class _GamesListCard extends StatelessWidget {
           logoPath: logoForJuego(sv.juego),
           statusColor: colorForEstado(sv.estado),
         )).toList(),
+
       ),
     );
   }
@@ -141,7 +142,7 @@ class _GamesListCard extends StatelessWidget {
 class _GameRow extends StatelessWidget {
   final ServidorJuego servidor;
   final VoidCallback onTap;
-  final String logoPath;
+  final String? logoPath;
   final Color statusColor;
 
   const _GameRow({
@@ -169,14 +170,16 @@ class _GameRow extends StatelessWidget {
               ),
               padding: const EdgeInsets.all(6),
               alignment: Alignment.center,
-              child: Image.asset(
-                logoPath,
-                width: 45,
-                height: 45,
-                fit: BoxFit.contain,
-                errorBuilder: (_, __, ___) =>
-                    const Icon(Icons.videogame_asset, color: Colors.grey),
-              ),
+              child: logoPath != null
+                  ? Image.asset(
+                      logoPath!,
+                      width: 45,
+                      height: 45,
+                      fit: BoxFit.contain,
+                      errorBuilder: (_, __, ___) =>
+                          const Icon(Icons.sports_esports, color: Colors.grey),
+                    )
+                  : const Icon(Icons.sports_esports, color: Colors.grey, size: 30),
             ),
             const SizedBox(width: 15),
             Expanded(

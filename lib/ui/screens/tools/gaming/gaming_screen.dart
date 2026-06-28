@@ -13,7 +13,7 @@ class GamingScreen extends ConsumerWidget {
 
   String _gameNameToId(String name) {
     final lower = name.toLowerCase();
-    if (lower.contains('counter strike') || lower.contains('cs')) return 'cs2';
+    if (lower.contains('counter')) return 'cs2';
     if (lower.contains('dota')) return 'dota2';
     if (lower.contains('fortnite')) return 'fortnite';
     if (lower.contains('valorant')) return 'valorant';
@@ -23,7 +23,7 @@ class GamingScreen extends ConsumerWidget {
 
   String? _logoForJuego(String juego) {
     final lower = juego.toLowerCase();
-    if (lower.contains('counter strike') || lower.contains('cs')) return AppAssets.logoCs2;
+    if (lower.contains('counter')) return AppAssets.logoCs2;
     if (lower.contains('dota')) return AppAssets.logoDota2;
     if (lower.contains('fortnite')) return AppAssets.logoFortnite;
     if (lower.contains('valorant')) return AppAssets.logoValorant;

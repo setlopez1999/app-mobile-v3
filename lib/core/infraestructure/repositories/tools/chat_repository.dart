@@ -23,7 +23,7 @@ class ChatRepository {
   }
 
   Future<Map<String, dynamic>> newSession() async {
-    final data = await _api.post('/v1/chat/new');
+    final data = await _api.post('/v1/chat/new', body: {});
     return data as Map<String, dynamic>;
   }
 }

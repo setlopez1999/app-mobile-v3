@@ -19,13 +19,16 @@ class ToolsApiClient {
   }
 
   Future<void> _init() async {
-    final baseUrl = dotenv.env['TOOLS_BASE_URL'] ?? 'http://serverpruebabryan.com.cd-latam.com';
+    final baseUrl = dotenv.env['TOOLS_BASE_URL'] ?? 'https://serverpruebabryan.com.cd-latam.com';
     _dio = Dio(
       BaseOptions(
         baseUrl: baseUrl,
         connectTimeout: const Duration(seconds: 15),
         receiveTimeout: const Duration(seconds: 30),
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
         validateStatus: (_) => true,
       ),
     );
@@ -64,12 +67,18 @@ class ToolsApiClient {
   Future<Map<String, dynamic>> get(String path) async {
     final d = await dio;
     final response = await d.get(path);
+    if (response.statusCode == 401) throw Exception('Sesión expirada');
+    if (response.statusCode != 200) throw Exception('Error ${response.statusCode}');
     return response.data as Map<String, dynamic>;
   }
 
   Future<Map<String, dynamic>> post(String path, {Map<String, dynamic>? body}) async {
     final d = await dio;
     final response = await d.post(path, data: body);
+    if (response.statusCode == 401) throw Exception('Sesión expirada');
+    if (response.statusCode != 200 && response.statusCode != 201) {
+      throw Exception('Error ${response.statusCode}');
+    }
     return response.data as Map<String, dynamic>;
   }
 }

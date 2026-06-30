@@ -30,11 +30,10 @@ class _DiagnosticoScreenState extends ConsumerState<DiagnosticoScreen> {
       case DiagnosticoStep.pingGoogle: return 0.1;
       case DiagnosticoStep.pingIsp:    return 0.25;
       case DiagnosticoStep.speedtest:  return 0.45;
-      case DiagnosticoStep.wifiInfo:   return 0.6;
-      case DiagnosticoStep.fibra:      return 0.75;
-      case DiagnosticoStep.guardando:  return 0.9;
+      case DiagnosticoStep.wifiInfo:   return 0.65;
+      case DiagnosticoStep.fibra:      return 0.8;
+      case DiagnosticoStep.guardando:  return 0.92;
       case DiagnosticoStep.completado: return 1.0;
-      case DiagnosticoStep.error:      return 0.0;
     }
   }
 
@@ -43,13 +42,48 @@ class _DiagnosticoScreenState extends ConsumerState<DiagnosticoScreen> {
       case DiagnosticoStep.idle:       return 'Preparando diagnóstico';
       case DiagnosticoStep.pingGoogle: return 'Midiendo latencia...';
       case DiagnosticoStep.pingIsp:    return 'Analizando red local...';
-      case DiagnosticoStep.speedtest:  return 'Analizando velocidad de internet';
+      case DiagnosticoStep.speedtest:  return 'Midiendo velocidad de internet';
       case DiagnosticoStep.wifiInfo:   return 'Escaneando WiFi...';
       case DiagnosticoStep.fibra:      return 'Verificando fibra óptica...';
       case DiagnosticoStep.guardando:  return 'Guardando resultados...';
       case DiagnosticoStep.completado: return 'Completado';
-      case DiagnosticoStep.error:      return 'Error en diagnóstico';
     }
+  }
+
+  // ── Subtítulos ────────────────────────────────────────────────────────────
+
+  String _subtitleGoogle(DiagnosticoState s) {
+    if (s.calidadGoogle == ItemCalidad.cargando) return 'Midiendo latencia...';
+    if (s.calidadGoogle == ItemCalidad.pendiente) return 'Esperando...';
+    if (s.calidadGoogle == ItemCalidad.fallido) return 'Sin acceso a internet';
+    if (s.calidadGoogle == ItemCalidad.malo) return 'Alta latencia: ${s.latenciaGoogleMs} ms';
+    return '${s.latenciaGoogleMs} ms · Google';
+  }
+
+  String _subtitleIsp(DiagnosticoState s) {
+    if (s.calidadIsp == ItemCalidad.cargando) return 'Analizando red...';
+    if (s.calidadIsp == ItemCalidad.pendiente) return 'Esperando...';
+    if (s.calidadIsp == ItemCalidad.fallido) return 'Sin respuesta del servidor';
+    if (s.calidadIsp == ItemCalidad.malo) return 'Alta latencia: ${s.latenciaIspMs} ms';
+    return '${s.latenciaIspMs} ms';
+  }
+
+  String _subtitleVelocidad(DiagnosticoState s) {
+    if (s.calidadVelocidad == ItemCalidad.cargando) return 'Midiendo velocidad...';
+    if (s.calidadVelocidad == ItemCalidad.pendiente) return 'Esperando...';
+    if (s.calidadVelocidad == ItemCalidad.fallido) return 'Sin conexión a internet';
+    final down = s.velocidadBajadaMbps?.toStringAsFixed(1) ?? '--';
+    final up = s.velocidadSubidaMbps?.toStringAsFixed(1) ?? '--';
+    return '↓ $down Mbps  ↑ $up Mbps';
+  }
+
+  String _subtitleFibra(DiagnosticoState s) {
+    if (s.calidadFibra == ItemCalidad.cargando) return 'Verificando fibra...';
+    if (s.calidadFibra == ItemCalidad.pendiente) return 'Esperando...';
+    if (s.calidadFibra == ItemCalidad.fallido) return 'No se pudo verificar la fibra';
+    if (s.calidadFibra == ItemCalidad.malo) return 'Estado: ${s.fibraEstado}';
+    final potencia = s.fibraPotenciaDbm ?? '--';
+    return '${s.fibraEstado}  ·  $potencia dBm';
   }
 
   @override
@@ -61,11 +95,6 @@ class _DiagnosticoScreenState extends ConsumerState<DiagnosticoScreen> {
       if (next.step == DiagnosticoStep.completado) {
         context.pushReplacement('/check_health/diagnostico_result');
       }
-      if (next.step == DiagnosticoStep.error) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${next.errorMsg}')),
-        );
-      }
     });
 
     return Scaffold(
@@ -75,7 +104,7 @@ class _DiagnosticoScreenState extends ConsumerState<DiagnosticoScreen> {
         scrolledUnderElevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => context.canPop() ? context.pop() : context.go('/'),
+          onPressed: () => context.pop(),
         ),
         title: const Text(
           'Diagnóstico',
@@ -91,43 +120,29 @@ class _DiagnosticoScreenState extends ConsumerState<DiagnosticoScreen> {
             const SizedBox(height: 50),
             _DiagnosticoStatusItem(
               title: 'Velocidad de internet',
-              subtitle: state.velocidadBajadaMbps != null
-                  ? 'Descarga: ${state.velocidadBajadaMbps!.toStringAsFixed(1)} Mbps / Subida: ${state.velocidadSubidaMbps?.toStringAsFixed(1) ?? '...'} Mbps'
-                  : 'Analizando...',
+              subtitle: _subtitleVelocidad(state),
               calidad: state.calidadVelocidad,
             ),
             const SizedBox(height: 15),
             _DiagnosticoStatusItem(
               title: 'Red WiFi Doméstica',
-              subtitle: state.latenciaIspMs != null ? '${state.latenciaIspMs} ms' : 'Esperando...',
+              subtitle: _subtitleIsp(state),
               calidad: state.calidadIsp,
             ),
             const SizedBox(height: 15),
             _DiagnosticoStatusItem(
-              title: 'Conexión WiFi',
-              subtitle: state.wifiSsid != null
-                  ? '${state.wifiSsid} (${state.wifiBanda ?? '--'})'
-                  : 'Analizando señal...',
-              calidad: state.calidadWifi,
-            ),
-            const SizedBox(height: 15),
-            _DiagnosticoStatusItem(
               title: 'Fibra óptica',
-              subtitle: state.fibraEstado != null
-                  ? 'Potencia: ${state.fibraPotenciaDbm}'
-                  : 'Esperando...',
+              subtitle: _subtitleFibra(state),
               calidad: state.calidadFibra,
             ),
             const SizedBox(height: 15),
             _DiagnosticoStatusItem(
               title: 'Latencia y estabilidad',
-              subtitle: state.latenciaGoogleMs != null
-                  ? '${state.latenciaGoogleMs}ms (Google)'
-                  : 'Esperando...',
+              subtitle: _subtitleGoogle(state),
               calidad: state.calidadGoogle,
             ),
             const Spacer(),
-            _CancelButton(onTap: () => context.go('/')),
+            _CancelButton(onTap: () => context.pop()),
             const SizedBox(height: 40),
           ],
         ),
@@ -216,7 +231,7 @@ class _DiagnosticoStatusItem extends StatelessWidget {
       case ItemCalidad.malo:
         return Icon(Icons.cancel, color: _color, size: 24);
       case ItemCalidad.fallido:
-        return const Icon(Icons.help_outline, color: Colors.grey, size: 24);
+        return const Icon(Icons.signal_wifi_off, color: Colors.grey, size: 24);
       case ItemCalidad.cargando:
         return SizedBox(
           width: 24,
@@ -229,28 +244,23 @@ class _DiagnosticoStatusItem extends StatelessWidget {
         );
       case ItemCalidad.pendiente:
         return Container(
-          width: 12,
-          height: 12,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: AppColors.textBody,
-          ),
+          width: 10,
+          height: 10,
+          decoration: BoxDecoration(shape: BoxShape.circle, color: AppColors.textBody),
         );
     }
   }
 
-  bool get _hasBorder =>
-      calidad != ItemCalidad.pendiente;
-
   @override
   Widget build(BuildContext context) {
+    final hasBorder = calidad != ItemCalidad.pendiente;
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
         color: const Color(0xFF32324A),
         borderRadius: BorderRadius.circular(15),
-        border: _hasBorder ? Border.all(color: _color.withOpacity(0.6)) : null,
+        border: hasBorder ? Border.all(color: _color.withOpacity(0.6)) : null,
       ),
       child: Row(
         children: [
@@ -260,18 +270,12 @@ class _DiagnosticoStatusItem extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
-                ),
-                Text(
-                  subtitle,
-                  style: TextStyle(color: _color, fontSize: 12),
-                ),
+                Text(title,
+                    style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14)),
+                Text(subtitle, style: TextStyle(color: _color, fontSize: 12)),
               ],
             ),
           ),
@@ -300,7 +304,8 @@ class _CancelButton extends StatelessWidget {
         child: const Center(
           child: Text(
             'Cancelar diagnóstico',
-            style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+            style: TextStyle(
+                color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
           ),
         ),
       ),

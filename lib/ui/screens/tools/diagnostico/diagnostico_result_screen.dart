@@ -23,15 +23,47 @@ class DiagnosticoResultScreen extends ConsumerWidget {
       case ItemCalidad.bueno:   return Icons.check_circle;
       case ItemCalidad.regular: return Icons.warning_amber_rounded;
       case ItemCalidad.malo:    return Icons.cancel;
-      default:                  return Icons.help_outline;
+      default:                  return Icons.signal_wifi_off;
     }
   }
 
-  Color _colorResultado(String? resultado) {
-    if (resultado == null) return Colors.grey;
-    if (resultado.contains('EXCELENTE')) return const Color(0xFF00D285);
-    if (resultado.contains('BUENO')) return Colors.orange;
+  Color _colorResultado(String? r) {
+    if (r == null) return Colors.grey;
+    if (r.contains('EXCELENTE')) return const Color(0xFF00D285);
+    if (r.contains('BUENO')) return Colors.orange;
     return const Color(0xFFF44336);
+  }
+
+  IconData _iconResultado(String? r) {
+    if (r?.contains('EXCELENTE') == true) return Icons.check_circle_outline;
+    if (r?.contains('BUENO') == true) return Icons.warning_amber_rounded;
+    return Icons.cancel_outlined;
+  }
+
+  String _subtitleGoogle(DiagnosticoState s) {
+    if (s.calidadGoogle == ItemCalidad.fallido) return 'Sin acceso a internet';
+    if (s.calidadGoogle == ItemCalidad.malo) return 'Alta latencia: ${s.latenciaGoogleMs} ms';
+    return s.latenciaGoogleMs != null ? '${s.latenciaGoogleMs} ms · Google' : 'Sin datos';
+  }
+
+  String _subtitleIsp(DiagnosticoState s) {
+    if (s.calidadIsp == ItemCalidad.fallido) return 'Sin respuesta del servidor';
+    if (s.calidadIsp == ItemCalidad.malo) return 'Alta latencia: ${s.latenciaIspMs} ms';
+    return s.latenciaIspMs != null ? '${s.latenciaIspMs} ms' : 'Sin datos';
+  }
+
+  String _subtitleVelocidad(DiagnosticoState s) {
+    if (s.calidadVelocidad == ItemCalidad.fallido) return 'Sin conexión a internet';
+    final down = s.velocidadBajadaMbps?.toStringAsFixed(1) ?? '--';
+    final up = s.velocidadSubidaMbps?.toStringAsFixed(1) ?? '--';
+    return '↓ $down Mbps  ↑ $up Mbps';
+  }
+
+  String _subtitleFibra(DiagnosticoState s) {
+    if (s.calidadFibra == ItemCalidad.fallido) return 'No se pudo verificar la fibra';
+    if (s.calidadFibra == ItemCalidad.malo) return 'Estado: ${s.fibraEstado}';
+    final potencia = s.fibraPotenciaDbm ?? '--';
+    return '${s.fibraEstado}  ·  $potencia dBm';
   }
 
   @override
@@ -47,7 +79,7 @@ class DiagnosticoResultScreen extends ConsumerWidget {
         scrolledUnderElevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => context.go('/tools/check-health'),
+          onPressed: () => context.pop(),
         ),
         title: const Text(
           'Resultado',
@@ -67,24 +99,16 @@ class DiagnosticoResultScreen extends ConsumerWidget {
                 color: resultColor.withOpacity(0.15),
                 border: Border.all(color: resultColor, width: 3),
               ),
-              child: Icon(
-                state.resultadoFinal?.contains('EXCELENTE') == true
-                    ? Icons.check_circle_outline
-                    : state.resultadoFinal?.contains('BUENO') == true
-                        ? Icons.warning_amber_rounded
-                        : Icons.cancel_outlined,
-                color: resultColor,
-                size: 60,
-              ),
+              child: Icon(_iconResultado(state.resultadoFinal),
+                  color: resultColor, size: 60),
             ),
             const SizedBox(height: 20),
             Text(
               state.resultadoFinal ?? 'Completado',
               style: TextStyle(
-                color: resultColor,
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-              ),
+                  color: resultColor,
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             const Text(
@@ -94,9 +118,7 @@ class DiagnosticoResultScreen extends ConsumerWidget {
             const SizedBox(height: 40),
             _ResultItem(
               title: 'Velocidad de internet',
-              subtitle: state.velocidadBajadaMbps != null
-                  ? '↓ ${state.velocidadBajadaMbps!.toStringAsFixed(1)} Mbps  ↑ ${state.velocidadSubidaMbps?.toStringAsFixed(1) ?? '--'} Mbps'
-                  : 'Sin datos',
+              subtitle: _subtitleVelocidad(state),
               calidad: state.calidadVelocidad,
               icon: Icons.speed,
               colorFn: _colorCalidad,
@@ -105,7 +127,7 @@ class DiagnosticoResultScreen extends ConsumerWidget {
             const SizedBox(height: 12),
             _ResultItem(
               title: 'Red WiFi Doméstica',
-              subtitle: state.latenciaIspMs != null ? '${state.latenciaIspMs} ms' : 'Sin datos',
+              subtitle: _subtitleIsp(state),
               calidad: state.calidadIsp,
               icon: Icons.router,
               colorFn: _colorCalidad,
@@ -113,21 +135,8 @@ class DiagnosticoResultScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 12),
             _ResultItem(
-              title: 'Conexión WiFi',
-              subtitle: state.wifiSsid != null
-                  ? '${state.wifiSsid}  ${state.wifiBanda ?? ''}'
-                  : 'Sin datos',
-              calidad: state.calidadWifi,
-              icon: Icons.wifi,
-              colorFn: _colorCalidad,
-              iconFn: _iconCalidad,
-            ),
-            const SizedBox(height: 12),
-            _ResultItem(
               title: 'Fibra óptica',
-              subtitle: state.fibraEstado != null
-                  ? '${state.fibraEstado}  ${state.fibraPotenciaDbm ?? ''}'
-                  : 'Sin datos',
+              subtitle: _subtitleFibra(state),
               calidad: state.calidadFibra,
               icon: Icons.cable,
               colorFn: _colorCalidad,
@@ -136,9 +145,7 @@ class DiagnosticoResultScreen extends ConsumerWidget {
             const SizedBox(height: 12),
             _ResultItem(
               title: 'Latencia y estabilidad',
-              subtitle: state.latenciaGoogleMs != null
-                  ? '${state.latenciaGoogleMs} ms (Google)'
-                  : 'Sin datos',
+              subtitle: _subtitleGoogle(state),
               calidad: state.calidadGoogle,
               icon: Icons.network_ping,
               colorFn: _colorCalidad,
@@ -146,7 +153,7 @@ class DiagnosticoResultScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 40),
             InkWell(
-              onTap: () => context.go('/tools/check-health'),
+              onTap: () => context.pop(),
               borderRadius: BorderRadius.circular(15),
               child: Container(
                 width: double.infinity,
@@ -157,12 +164,11 @@ class DiagnosticoResultScreen extends ConsumerWidget {
                 ),
                 child: const Center(
                   child: Text(
-                    'Volver a Check Health',
+                    'Volver',
                     style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold),
                   ),
                 ),
               ),

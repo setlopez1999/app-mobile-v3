@@ -1,10 +1,11 @@
+import 'package:tvapp/core/domain/entities/tools/fibra.dart';
+import 'package:tvapp/core/domain/entities/tools/wifi_info.dart';
 import 'package:tvapp/core/services/tools/network_analyzer_service.dart';
 import 'package:tvapp/core/services/local_device_service.dart';
 import 'package:tvapp/core/domain/entities/tools/diagnostico.dart';
 import 'package:tvapp/core/infraestructure/repositories/tools/diagnostico_repository.dart';
 import 'package:tvapp/core/infraestructure/repositories/tools/fibra_repository.dart';
 
-/// Pasos del diagnóstico — usados como señal de progreso hacia la capa de presentación.
 enum DiagnosticoProgress {
   pingGoogle,
   pingIsp,
@@ -72,45 +73,42 @@ class RunDiagnosticoUseCase {
         _diagnosticoRepo = diagnosticoRepo,
         _fibraRepo = fibraRepo;
 
-  /// Ejecuta el diagnóstico completo y notifica el progreso vía [onProgress].
-  /// Si [onProgress] no se provee la ejecución sigue siendo válida (útil en tests).
+  /// Cada paso es independiente — nunca lanza. Si un paso falla, los demás continúan.
   Future<RunDiagnosticoResult> execute(
     RunDiagnosticoInput input, {
     void Function(DiagnosticoProgress step)? onProgress,
     void Function(DiagnosticoProgress step, dynamic value)? onStepResult,
   }) async {
     onProgress?.call(DiagnosticoProgress.pingGoogle);
-    final pingGoogle = await _networkService.ping(input.googleTarget);
+    final pingGoogle = await _safePing(input.googleTarget);
     onStepResult?.call(DiagnosticoProgress.pingGoogle, pingGoogle.avgMs.round());
 
     onProgress?.call(DiagnosticoProgress.pingIsp);
-    final pingIsp = await _networkService.ping(input.ispTarget);
+    final pingIsp = await _safePing(input.ispTarget);
     onStepResult?.call(DiagnosticoProgress.pingIsp, pingIsp.avgMs.round());
 
     onProgress?.call(DiagnosticoProgress.speedtest);
-    final speed = await _networkService.runSpeedTest(serverBaseUrl: input.serverBaseUrl);
+    final speed = await _safeSpeedTest(input.serverBaseUrl);
     onStepResult?.call(DiagnosticoProgress.speedtest, speed);
 
     onProgress?.call(DiagnosticoProgress.wifiInfo);
-    final wifiInfo = await _localDeviceService.getWifiInfo();
+    final wifiInfo = await _safeWifiInfo();
     onStepResult?.call(DiagnosticoProgress.wifiInfo, wifiInfo);
 
     onProgress?.call(DiagnosticoProgress.fibra);
-    final fibra = await _fibraRepo.getFibra();
+    final fibra = await _safeFibra();
     onStepResult?.call(DiagnosticoProgress.fibra, fibra);
 
     onProgress?.call(DiagnosticoProgress.guardando);
-    final result = await _diagnosticoRepo.saveDiagnostico(
-      DiagnosticoRequest(
-        clienteId: input.clienteId,
-        latenciaGoogleMs: pingGoogle.avgMs.round(),
-        latenciaIspMs: pingIsp.avgMs.round(),
-        velocidadBajadaMbps: speed.downloadMbps,
-        velocidadSubidaMbps: speed.uploadMbps,
-        fibraPotenciaDbm: fibra.potenciaDbm,
-        fibraEstado: fibra.estado,
-      ),
-    );
+    final resultado = await _safeSave(DiagnosticoRequest(
+      clienteId: input.clienteId,
+      latenciaGoogleMs: pingGoogle.avgMs.round(),
+      latenciaIspMs: pingIsp.avgMs.round(),
+      velocidadBajadaMbps: speed.downloadMbps,
+      velocidadSubidaMbps: speed.uploadMbps,
+      fibraPotenciaDbm: fibra.potenciaDbm,
+      fibraEstado: fibra.estado,
+    ));
 
     return RunDiagnosticoResult(
       latenciaGoogleMs: pingGoogle.avgMs.round(),
@@ -123,7 +121,61 @@ class RunDiagnosticoUseCase {
       wifiGateway: wifiInfo.gatewayAddress,
       fibraPotenciaDbm: fibra.potenciaDbm,
       fibraEstado: fibra.estado,
-      resultado: result.resultado,
+      resultado: resultado,
     );
+  }
+
+  // ── Wrappers seguros ─────────────────────────────────────────────────────────
+
+  Future<PingResult> _safePing(String host) async {
+    try {
+      return await _networkService.ping(host);
+    } catch (_) {
+      return PingResult.failure();
+    }
+  }
+
+  Future<SpeedTestResult> _safeSpeedTest(String serverBaseUrl) async {
+    try {
+      return await _networkService.runSpeedTest(serverBaseUrl: serverBaseUrl);
+    } catch (_) {
+      return const SpeedTestResult(downloadMbps: 0, uploadMbps: 0);
+    }
+  }
+
+  Future<WifiInfo> _safeWifiInfo() async {
+    try {
+      return await _localDeviceService.getWifiInfo();
+    } catch (_) {
+      return WifiInfo.empty();
+    }
+  }
+
+  Future<Fibra> _safeFibra() async {
+    try {
+      return await _fibraRepo.getFibra();
+    } catch (_) {
+      return const Fibra(potenciaDbm: '--', estado: 'ERROR');
+    }
+  }
+
+  Future<String> _safeSave(DiagnosticoRequest req) async {
+    try {
+      final result = await _diagnosticoRepo.saveDiagnostico(req);
+      return result.resultado;
+    } catch (_) {
+      return _resultadoLocal(req);
+    }
+  }
+
+  /// Calcula un resultado local cuando el backend no está disponible.
+  String _resultadoLocal(DiagnosticoRequest req) {
+    int score = 0;
+    if (req.latenciaGoogleMs > 0 && req.latenciaGoogleMs < 150) score++;
+    if (req.latenciaIspMs > 0 && req.latenciaIspMs < 150) score++;
+    if (req.velocidadBajadaMbps > 10) score++;
+    if (score == 3) return 'EXCELENTE';
+    if (score >= 2) return 'BUENO';
+    return 'DEFICIENTE';
   }
 }

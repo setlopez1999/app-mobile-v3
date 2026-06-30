@@ -18,7 +18,6 @@ enum DiagnosticoStep {
   fibra,
   guardando,
   completado,
-  error,
 }
 
 enum ItemCalidad { pendiente, cargando, bueno, regular, malo, fallido }
@@ -36,11 +35,9 @@ class DiagnosticoState {
   final String? wifiBanda;
   final String? wifiGateway;
   final String? resultadoFinal;
-  final String? errorMsg;
   final ItemCalidad calidadGoogle;
   final ItemCalidad calidadIsp;
   final ItemCalidad calidadVelocidad;
-  final ItemCalidad calidadWifi;
   final ItemCalidad calidadFibra;
 
   const DiagnosticoState({
@@ -56,11 +53,9 @@ class DiagnosticoState {
     this.wifiBanda,
     this.wifiGateway,
     this.resultadoFinal,
-    this.errorMsg,
     this.calidadGoogle = ItemCalidad.pendiente,
     this.calidadIsp = ItemCalidad.pendiente,
     this.calidadVelocidad = ItemCalidad.pendiente,
-    this.calidadWifi = ItemCalidad.pendiente,
     this.calidadFibra = ItemCalidad.pendiente,
   });
 
@@ -77,11 +72,9 @@ class DiagnosticoState {
     String? wifiBanda,
     String? wifiGateway,
     String? resultadoFinal,
-    String? errorMsg,
     ItemCalidad? calidadGoogle,
     ItemCalidad? calidadIsp,
     ItemCalidad? calidadVelocidad,
-    ItemCalidad? calidadWifi,
     ItemCalidad? calidadFibra,
   }) =>
       DiagnosticoState(
@@ -97,26 +90,28 @@ class DiagnosticoState {
         wifiBanda: wifiBanda ?? this.wifiBanda,
         wifiGateway: wifiGateway ?? this.wifiGateway,
         resultadoFinal: resultadoFinal ?? this.resultadoFinal,
-        errorMsg: errorMsg ?? this.errorMsg,
         calidadGoogle: calidadGoogle ?? this.calidadGoogle,
         calidadIsp: calidadIsp ?? this.calidadIsp,
         calidadVelocidad: calidadVelocidad ?? this.calidadVelocidad,
-        calidadWifi: calidadWifi ?? this.calidadWifi,
         calidadFibra: calidadFibra ?? this.calidadFibra,
       );
 }
 
-ItemCalidad _calidadLatencia(int ms, {bool isGoogle = true}) {
+// ── Clasificadores ────────────────────────────────────────────────────────────
+
+ItemCalidad _calidadLatenciaGoogle(int ms) {
   if (ms <= 0) return ItemCalidad.fallido;
-  if (isGoogle) {
-    if (ms < 50) return ItemCalidad.bueno;
-    if (ms < 150) return ItemCalidad.regular;
-    return ItemCalidad.malo;
-  } else {
-    if (ms < 20) return ItemCalidad.bueno;
-    if (ms < 80) return ItemCalidad.regular;
-    return ItemCalidad.malo;
-  }
+  if (ms < 50) return ItemCalidad.bueno;
+  if (ms < 150) return ItemCalidad.regular;
+  return ItemCalidad.malo;
+}
+
+// ISP usa TCP → umbrales más relajados que ICMP
+ItemCalidad _calidadLatenciaIsp(int ms) {
+  if (ms <= 0) return ItemCalidad.fallido;
+  if (ms < 50) return ItemCalidad.bueno;
+  if (ms < 150) return ItemCalidad.regular;
+  return ItemCalidad.malo;
 }
 
 ItemCalidad _calidadVelocidad(double mbps) {
@@ -127,9 +122,15 @@ ItemCalidad _calidadVelocidad(double mbps) {
 }
 
 ItemCalidad _calidadFibra(String estado) {
-  if (estado == 'OK') return ItemCalidad.bueno;
-  return ItemCalidad.malo;
+  switch (estado) {
+    case 'OK':        return ItemCalidad.bueno;
+    case 'DEGRADADO': return ItemCalidad.regular;
+    case 'FALLA':     return ItemCalidad.malo;
+    default:          return ItemCalidad.fallido; // 'ERROR' o desconocido
+  }
 }
+
+// ── Notifier ──────────────────────────────────────────────────────────────────
 
 class DiagnosticoNotifier extends Notifier<DiagnosticoState> {
   @override
@@ -163,9 +164,6 @@ class DiagnosticoNotifier extends Notifier<DiagnosticoState> {
             calidadVelocidad: progress == DiagnosticoProgress.speedtest
                 ? ItemCalidad.cargando
                 : state.calidadVelocidad,
-            calidadWifi: progress == DiagnosticoProgress.wifiInfo
-                ? ItemCalidad.cargando
-                : state.calidadWifi,
             calidadFibra: progress == DiagnosticoProgress.fibra
                 ? ItemCalidad.cargando
                 : state.calidadFibra,
@@ -177,13 +175,13 @@ class DiagnosticoNotifier extends Notifier<DiagnosticoState> {
               final ms = value as int;
               state = state.copyWith(
                 latenciaGoogleMs: ms,
-                calidadGoogle: _calidadLatencia(ms, isGoogle: true),
+                calidadGoogle: _calidadLatenciaGoogle(ms),
               );
             case DiagnosticoProgress.pingIsp:
               final ms = value as int;
               state = state.copyWith(
                 latenciaIspMs: ms,
-                calidadIsp: _calidadLatencia(ms, isGoogle: false),
+                calidadIsp: _calidadLatenciaIsp(ms),
               );
             case DiagnosticoProgress.speedtest:
               final speed = value as SpeedTestResult;
@@ -193,13 +191,13 @@ class DiagnosticoNotifier extends Notifier<DiagnosticoState> {
                 calidadVelocidad: _calidadVelocidad(speed.downloadMbps),
               );
             case DiagnosticoProgress.wifiInfo:
+              // Solo guardamos los datos — no se muestra como item de calidad
               final wifi = value as WifiInfo;
               state = state.copyWith(
                 wifiSsid: wifi.ssid,
                 wifiSenialDbm: wifi.signalStrengthDbm,
                 wifiBanda: wifi.band,
                 wifiGateway: wifi.gatewayAddress,
-                calidadWifi: wifi.ssid != null ? ItemCalidad.bueno : ItemCalidad.fallido,
               );
             case DiagnosticoProgress.fibra:
               final fibra = value as Fibra;
@@ -220,8 +218,13 @@ class DiagnosticoNotifier extends Notifier<DiagnosticoState> {
       );
 
       ref.invalidate(historialDiagnosticoProvider);
-    } catch (e) {
-      state = state.copyWith(step: DiagnosticoStep.error, errorMsg: e.toString());
+    } catch (_) {
+      // Nunca debe llegar aquí (todos los pasos son seguros),
+      // pero si ocurre un error inesperado igual completamos.
+      state = state.copyWith(
+        step: DiagnosticoStep.completado,
+        resultadoFinal: state.resultadoFinal ?? 'DEFICIENTE',
+      );
     }
   }
 

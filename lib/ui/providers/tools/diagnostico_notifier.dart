@@ -121,8 +121,8 @@ ItemCalidad _calidadLatencia(int ms, {bool isGoogle = true}) {
 
 ItemCalidad _calidadVelocidad(double mbps) {
   if (mbps <= 0) return ItemCalidad.fallido;
-  if (mbps > 50) return ItemCalidad.bueno;
-  if (mbps > 10) return ItemCalidad.regular;
+  if (mbps > 20) return ItemCalidad.bueno;
+  if (mbps > 5) return ItemCalidad.regular;
   return ItemCalidad.malo;
 }
 

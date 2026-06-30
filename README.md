@@ -6,21 +6,18 @@
 - Flutter `3.35.7` (gestionado por FVM)
 - Android SDK (para compilar APK)
 
-## Setup inicial (primera vez)
+## Setup inicial (primera vez o después de clonar)
 
 ```bash
-# 1. Instalar la versión correcta de Flutter
-fvm install
-
-# 2. Instalar dependencias
-fvm flutter pub get
-
-# 3. Generar código (freezed / riverpod / json_serializable)
-fvm dart run build_runner build --delete-conflicting-outputs
+fvm install                                                         # 1. Instalar Flutter 3.35.7
+fvm flutter clean                                                    # 2. Limpiar build / .dart_tool
+fvm flutter pub get                                                  # 3. Bajar dependencias
+fvm dart run build_runner build --delete-conflicting-outputs         # 4. Generar freezed / g.dart
+fvm flutter run                                                      # 5. Correr la app
 ```
 
 > Los archivos `*.freezed.dart` y `*.g.dart` son auto-generados y no están en git.
-> Debes generarlos localmente antes de correr la app.
+> Debes generarlos localmente antes de correr la app (paso 4).
 
 ## Correr la app
 

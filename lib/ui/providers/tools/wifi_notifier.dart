@@ -3,7 +3,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:tvapp/core/infraestructure/datasource/tools/tools_api_client.dart';
 import 'package:tvapp/core/infraestructure/repositories/tools/wifi_repository.dart';
 import 'package:tvapp/core/infraestructure/repositories/tools/wifi_repository_impl.dart';
-import 'package:tvapp/storage/tools/local_storage.dart';
 
 part 'wifi_notifier.g.dart';
 
@@ -26,6 +25,10 @@ final wifiRepositoryProvider = Provider<WifiRepository>((ref) {
   return WifiRepositoryImpl(ToolsApiClient());
 });
 
+final wifiSsidProvider = FutureProvider<String?>((ref) {
+  return ref.watch(wifiRepositoryProvider).getSsid();
+});
+
 @riverpod
 class WifiNotifier extends _$WifiNotifier {
   @override
@@ -34,8 +37,7 @@ class WifiNotifier extends _$WifiNotifier {
   Future<void> cambiarNombre(String nuevoNombre) async {
     state = state.copyWith(isLoading: true, errorMsg: null);
     try {
-      final clienteId = LocalStorage.getClienteId() ?? '';
-      await ref.read(wifiRepositoryProvider).cambiarNombre(clienteId, nuevoNombre);
+      await ref.read(wifiRepositoryProvider).cambiarNombre(nuevoNombre);
       state = state.copyWith(isLoading: false, success: true);
     } catch (e) {
       state = state.copyWith(
@@ -49,8 +51,7 @@ class WifiNotifier extends _$WifiNotifier {
   Future<void> cambiarPassword(String nuevaPassword) async {
     state = state.copyWith(isLoading: true, errorMsg: null);
     try {
-      final clienteId = LocalStorage.getClienteId() ?? '';
-      await ref.read(wifiRepositoryProvider).cambiarPassword(clienteId, nuevaPassword);
+      await ref.read(wifiRepositoryProvider).cambiarPassword(nuevaPassword);
       state = state.copyWith(isLoading: false, success: true);
     } catch (e) {
       state = state.copyWith(

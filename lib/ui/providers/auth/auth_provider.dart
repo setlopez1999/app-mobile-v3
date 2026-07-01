@@ -13,6 +13,7 @@ import 'package:tvapp/core/domain/entities/sensitive_data/sensitive_data_entity.
 import 'package:tvapp/core/domain/entities/user/user_entity.dart';
 import 'package:tvapp/core/providers/repository_providers.dart';
 import 'package:tvapp/core/shared/exceptions/app_exception.dart';
+import 'package:tvapp/storage/tools/local_storage.dart';
 
 part 'auth_provider.g.dart';
 
@@ -60,6 +61,7 @@ class Auth extends _$Auth {
           deviceId: user.devid,
         ),
       );
+      LocalStorage.setClienteId(user.us_id);
     }
   }
 
@@ -79,13 +81,17 @@ class Auth extends _$Auth {
           state = const AuthState.initial();
           await CleanSessionUseCase(repo).execute();
         },
-        (user) => silent ? null : state = AuthState.success(user),
+        (user) {
+          LocalStorage.setClienteId(data.userID);
+          if (!silent) state = AuthState.success(user);
+        },
       );
     }
   }
 
   Future<void> logout() async {
     await CleanSessionUseCase(ref.read(authRepositoryProvider)).execute();
+    await LocalStorage.removeClienteId();
     resetAllProviders();
     state = const AuthState.initial();
   }

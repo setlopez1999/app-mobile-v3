@@ -1,5 +1,6 @@
 import 'wifi_repository.dart';
 import 'package:tvapp/core/infraestructure/datasource/tools/tools_api_client.dart';
+import 'package:tvapp/storage/tools/local_storage.dart';
 
 class WifiRepositoryImpl implements WifiRepository {
   final ToolsApiClient _api;
@@ -7,7 +8,8 @@ class WifiRepositoryImpl implements WifiRepository {
   WifiRepositoryImpl(this._api);
 
   @override
-  Future<void> cambiarNombre(String clienteId, String nuevoNombre) async {
+  Future<void> cambiarNombre(String nuevoNombre) async {
+    final clienteId = LocalStorage.getClienteId() ?? '';
     final data = await _api.post(
       '/v1/wifi/nombre',
       body: {'cliente_id': clienteId, 'nuevo_nombre': nuevoNombre},
@@ -18,13 +20,23 @@ class WifiRepositoryImpl implements WifiRepository {
   }
 
   @override
-  Future<void> cambiarPassword(String clienteId, String nuevaPassword) async {
-    final data = await _api.post(
+  Future<void> cambiarPassword(String nuevaPassword) async {
+    final data = await _api.postForgiving(
       '/v1/wifi/password',
-      body: {'cliente_id': clienteId, 'nueva_password': nuevaPassword},
+      body: {'nueva_password': nuevaPassword},
     );
-    if (data['success'] != true) {
-      throw Exception(data['mensaje'] ?? 'Error al cambiar contraseña');
-    }
+    if (data['success'] == true) return;
+    final msg = data['msg'] as String?
+        ?? data['mensaje'] as String?
+        ?? data['message'] as String?
+        ?? (data['error'] is String ? data['error'] as String : null)
+        ?? 'Error al cambiar contraseña';
+    throw Exception(msg);
+  }
+
+  @override
+  Future<String?> getSsid() async {
+    final data = await _api.get('/v1/wifi/ssid');
+    return data['ssid'] as String?;
   }
 }

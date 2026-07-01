@@ -42,6 +42,7 @@ import 'package:tvapp/ui/screens/tools/offline/offline_screen.dart';
 import 'package:tvapp/ui/screens/tools/asistencia/asistencia_loading_screen.dart';
 import 'package:tvapp/ui/screens/tools/historial/historial_screen.dart';
 import 'package:tvapp/ui/screens/tools/offline/offline_result_screen.dart';
+import 'package:tvapp/ui/screens/tools/wifi_password/wifi_password_screen.dart';
 part 'router.g.dart';
 
 @riverpod
@@ -326,8 +327,18 @@ GoRouter appRouter(Ref ref) {
         path: '/tools/offline/result',
         name: OfflineResultScreen.name,
         builder: (_, state) {
-          final data = state.extra as Map<String, dynamic>? ?? {};
-          return OfflineResultScreen(data: data);
+          final type = state.extra as String? ?? 'all';
+          return OfflineResultScreen(type: type);
+        },
+        pageBuilder: GoTransitions.cupertino,
+      ),
+      /// Tools: Wifi Password
+      GoRoute(
+        path: WifiPasswordScreen.path,
+        name: WifiPasswordScreen.name,
+        builder: (_, state) {
+          final ssid = state.extra as String? ?? '';
+          return WifiPasswordScreen(ssid: ssid);
         },
         pageBuilder: GoTransitions.cupertino,
       ),

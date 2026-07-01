@@ -4,14 +4,13 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tvapp/core/theme/app_colors.dart';
 import 'package:tvapp/ui/shared/constants/app_assets.dart';
-import 'package:tvapp/core/services/tools/local_device_service.dart';
-import 'package:tvapp/core/domain/entities/tools/wifi_info.dart';
+import 'package:tvapp/ui/providers/tools/wifi_notifier.dart';
 import 'package:tvapp/core/domain/entities/tools/diagnostico.dart';
 import 'package:tvapp/ui/providers/tools/dispositivos_providers.dart';
 import 'package:tvapp/ui/providers/tools/fibra_providers.dart';
 import 'package:tvapp/ui/providers/tools/diagnostico_providers.dart';
-import 'package:tvapp/ui/screens/change_password/change_password_screen.dart';
 import 'package:tvapp/ui/screens/menu/menu_grid.screen.dart';
+import 'package:tvapp/ui/screens/tools/wifi_password/wifi_password_screen.dart';
 import 'package:tvapp/ui/screens/tools/asistencia/asistencia_loading_screen.dart';
 import 'package:tvapp/ui/screens/tools/chat/chat_screen.dart';
 import 'package:tvapp/ui/screens/tools/diagnostico/diagnostico_screen.dart';
@@ -20,10 +19,6 @@ import 'package:tvapp/ui/screens/tools/gaming/gaming_screen.dart';
 import 'package:tvapp/ui/screens/tools/historial/historial_screen.dart';
 import 'package:tvapp/ui/screens/tools/offline/offline_screen.dart';
 
-final _lastWifiInfoProvider = FutureProvider.autoDispose((ref) async {
-  final service = ref.watch(localDeviceServiceProvider);
-  return service.getWifiInfo();
-});
 
 class CheckHealthScreen extends ConsumerWidget {
   static const String name = 'Check Health';
@@ -35,7 +30,7 @@ class CheckHealthScreen extends ConsumerWidget {
     final dispositivosAsync = ref.watch(dispositivosProvider);
     final historialAsync = ref.watch(historialDiagnosticoProvider);
     final fibraAsync = ref.watch(fibraProvider);
-    final wifiAsync = ref.watch(_lastWifiInfoProvider);
+    final ssid = ref.watch(wifiSsidProvider).maybeWhen(data: (s) => s, orElse: () => null);
 
     final deviceCount = dispositivosAsync.maybeWhen(data: (d) => d.length, orElse: () => 0);
     final ultimoDiagnostico = historialAsync.maybeWhen(
@@ -43,7 +38,6 @@ class CheckHealthScreen extends ConsumerWidget {
       orElse: () => null,
     );
     final fibraEstado = fibraAsync.maybeWhen(data: (f) => f.estado, orElse: () => null);
-    final wifiInfo = wifiAsync.maybeWhen(data: (w) => w, orElse: () => null);
 
     return Scaffold(
       appBar: AppBar(
@@ -71,7 +65,7 @@ class CheckHealthScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 10),
-            _WifiStatusCard(fibraEstado: fibraEstado, wifiInfo: wifiInfo),
+            _WifiStatusCard(fibraEstado: fibraEstado, ssid: ssid),
             const SizedBox(height: 30),
             const Text(
               'Diagnóstico de red',
@@ -112,9 +106,9 @@ class CheckHealthScreen extends ConsumerWidget {
 
 class _WifiStatusCard extends StatelessWidget {
   final String? fibraEstado;
-  final WifiInfo? wifiInfo;
+  final String? ssid;
 
-  const _WifiStatusCard({this.fibraEstado, this.wifiInfo});
+  const _WifiStatusCard({this.fibraEstado, this.ssid});
 
   @override
   Widget build(BuildContext context) {
@@ -146,11 +140,11 @@ class _WifiStatusCard extends StatelessWidget {
             ? 'Señal degradada'
             : 'Sin internet';
 
-    final ssid = wifiInfo?.ssid;
-    final subtitulo = (ssid != null && ssid.isNotEmpty) ? ssid : '--';
+    final localSsid = ssid;
+    final subtitulo = (localSsid != null && localSsid.isNotEmpty) ? localSsid : '--';
 
     return InkWell(
-      onTap: () => context.pushNamed(ChangePasswordScreen.name),
+      onTap: () => context.pushNamed(WifiPasswordScreen.name, extra: ssid ?? ''),
       borderRadius: BorderRadius.circular(25),
       child: Container(
         padding: const EdgeInsets.all(20),
@@ -216,13 +210,21 @@ class _LastDiagnosticChip extends StatelessWidget {
 
   const _LastDiagnosticChip({this.ultimo});
 
+  String _hora(DateTime fecha) {
+    final h = fecha.hour.toString().padLeft(2, '0');
+    final m = fecha.minute.toString().padLeft(2, '0');
+    return '$h:$m';
+  }
+
   String _tiempoRelativo(DateTime fecha) {
-    final diff = DateTime.now().difference(fecha);
-    if (diff.inMinutes < 1) return 'Ahora';
-    if (diff.inMinutes < 60) return 'Hace ${diff.inMinutes} min';
-    if (diff.inHours < 24) return 'Hace ${diff.inHours} h';
-    if (diff.inDays == 1) return 'Ayer';
-    return 'Hace ${diff.inDays} días';
+    final now = DateTime.now();
+    final hoy = DateTime(now.year, now.month, now.day);
+    final diaFecha = DateTime(fecha.year, fecha.month, fecha.day);
+    final diff = hoy.difference(diaFecha).inDays;
+
+    if (diff == 0) return 'Hoy ${_hora(fecha)}';
+    if (diff == 1) return 'Ayer ${_hora(fecha)}';
+    return 'Hace $diff días';
   }
 
   @override

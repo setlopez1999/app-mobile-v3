@@ -85,4 +85,12 @@ class ToolsApiClient implements IToolsApiDatasource {
     }
     return response.data as Map<String, dynamic>;
   }
+
+  /// Como [post] pero retorna el body incluso en respuestas 4xx/5xx.
+  /// Usar cuando el endpoint devuelve mensajes de error en el body.
+  Future<Map<String, dynamic>> postForgiving(String path, {Map<String, dynamic>? body}) async {
+    final d = await dio;
+    final response = await d.post(path, data: body);
+    return response.data as Map<String, dynamic>;
+  }
 }

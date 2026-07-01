@@ -16,6 +16,7 @@ class DiagnosticoRepositoryImpl implements DiagnosticoRepository {
               id: e['id'] as String,
               fecha: DateTime.parse(e['fecha'] as String),
               latenciaIspMs: e['latencia_isp_ms'] as int,
+              latenciaGoogleMs: e['latencia_google_ms'] as int?,
               velocidadBajadaMbps: (e['velocidad_bajada_mbps'] as num).toDouble(),
               resultado: e['resultado'] as String,
             ))

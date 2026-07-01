@@ -4,8 +4,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tvapp/core/theme/app_colors.dart';
 import 'package:tvapp/ui/shared/constants/app_assets.dart';
-import 'package:tvapp/core/theme/branding_config.dart';
-import 'package:tvapp/core/services/local_device_service.dart';
+import 'package:tvapp/core/services/tools/local_device_service.dart';
+import 'package:tvapp/core/domain/entities/tools/wifi_info.dart';
 import 'package:tvapp/core/domain/entities/tools/diagnostico.dart';
 import 'package:tvapp/ui/providers/tools/dispositivos_providers.dart';
 import 'package:tvapp/ui/providers/tools/fibra_providers.dart';
@@ -17,6 +17,7 @@ import 'package:tvapp/ui/screens/tools/chat/chat_screen.dart';
 import 'package:tvapp/ui/screens/tools/diagnostico/diagnostico_screen.dart';
 import 'package:tvapp/ui/screens/tools/dispositivos/devices_screen.dart';
 import 'package:tvapp/ui/screens/tools/gaming/gaming_screen.dart';
+import 'package:tvapp/ui/screens/tools/historial/historial_screen.dart';
 import 'package:tvapp/ui/screens/tools/offline/offline_screen.dart';
 
 final _lastWifiInfoProvider = FutureProvider.autoDispose((ref) async {
@@ -88,7 +89,6 @@ class CheckHealthScreen extends ConsumerWidget {
               child: _MetricsGrid(
                 ultimo: ultimoDiagnostico,
                 deviceCount: deviceCount,
-                wifiInfo: wifiInfo,
               ),
             ),
             const SizedBox(height: 30),
@@ -110,18 +110,44 @@ class CheckHealthScreen extends ConsumerWidget {
 
 // ── Widgets privados ──────────────────────────────────────────────────────────
 
-class _WifiStatusCard extends ConsumerWidget {
+class _WifiStatusCard extends StatelessWidget {
   final String? fibraEstado;
-  final dynamic wifiInfo;
+  final WifiInfo? wifiInfo;
 
   const _WifiStatusCard({this.fibraEstado, this.wifiInfo});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final conectado = fibraEstado == 'OK';
-    final branding = ref.watch(brandingProvider);
-    final color1 = branding.colorGradient1 ?? const Color(0xFF00CC66);
-    final color2 = branding.colorGradient2 ?? const Color(0xFF004E92);
+  Widget build(BuildContext context) {
+    final estado = fibraEstado ?? '';
+    final conectado = estado == 'OK';
+    final degradado = estado == 'DEGRADADO';
+
+    final List<Color> gradientColors;
+    final Color badgeColor;
+    final IconData badgeIcon;
+
+    if (conectado) {
+      gradientColors = [AppColors.gradientOk1, AppColors.gradientOk2];
+      badgeColor = AppColors.accentBlue;
+      badgeIcon = Icons.check;
+    } else if (degradado) {
+      gradientColors = [AppColors.gradientDegradado1, AppColors.gradientDegradado2];
+      badgeColor = AppColors.warning;
+      badgeIcon = Icons.warning_amber_rounded;
+    } else {
+      gradientColors = [AppColors.gradientDesconectado1, AppColors.gradientDesconectado2];
+      badgeColor = AppColors.error;
+      badgeIcon = Icons.close;
+    }
+
+    final titulo = conectado
+        ? 'Conectado'
+        : degradado
+            ? 'Señal degradada'
+            : 'Sin internet';
+
+    final ssid = wifiInfo?.ssid;
+    final subtitulo = (ssid != null && ssid.isNotEmpty) ? ssid : '--';
 
     return InkWell(
       onTap: () => context.pushNamed(ChangePasswordScreen.name),
@@ -130,9 +156,7 @@ class _WifiStatusCard extends ConsumerWidget {
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: conectado
-                ? [color1, color2]
-                : [Colors.grey.shade700, Colors.grey.shade600],
+            colors: gradientColors,
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -158,11 +182,8 @@ class _WifiStatusCard extends ConsumerWidget {
                   top: 0,
                   child: Container(
                     padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: conectado ? AppColors.accentBlue : Colors.redAccent,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(conectado ? Icons.check : Icons.close, color: Colors.white, size: 12),
+                    decoration: BoxDecoration(color: badgeColor, shape: BoxShape.circle),
+                    child: Icon(badgeIcon, color: Colors.white, size: 12),
                   ),
                 ),
               ],
@@ -173,15 +194,11 @@ class _WifiStatusCard extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    wifiInfo?.ssid != null
-                        ? '${wifiInfo.ssid}'
-                        : conectado ? 'Conectado a WiFi' : 'Desconectado',
+                    titulo,
                     style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   Text(
-                    wifiInfo != null
-                        ? '${wifiInfo.signalQuality} (${wifiInfo.signalStrengthDbm ?? '--'} dBm) · ${wifiInfo.band}'
-                        : conectado ? 'Fibra óptica: OK' : 'Fibra: $fibraEstado',
+                    subtitulo,
                     style: const TextStyle(color: Colors.white70, fontSize: 14),
                   ),
                 ],
@@ -235,18 +252,16 @@ class _LastDiagnosticChip extends StatelessWidget {
 class _MetricsGrid extends StatelessWidget {
   final Diagnostico? ultimo;
   final int deviceCount;
-  final dynamic wifiInfo;
 
-  const _MetricsGrid({this.ultimo, required this.deviceCount, this.wifiInfo});
+  const _MetricsGrid({this.ultimo, required this.deviceCount});
 
   @override
   Widget build(BuildContext context) {
     final velocidad = ultimo?.velocidadBajadaMbps;
     final latenciaIsp = ultimo?.latenciaIspMs;
+    final latenciaGoogle = ultimo?.latenciaGoogleMs;
     final resultado = ultimo?.resultado ?? '';
     final isExito = resultado.startsWith('EXCELENTE');
-    final senialDbm = wifiInfo?.signalStrengthDbm;
-    final senialStr = senialDbm != null ? '$senialDbm dBm' : '--';
 
     return Row(
       children: [
@@ -271,10 +286,9 @@ class _MetricsGrid extends StatelessWidget {
         )),
         Expanded(child: _MetricItem(
           svgAsset: AppAssets.toolsWifi,
-          label: senialStr,
-          subLabel: 'Señal WiFi',
-          color: wifiInfo != null ? AppColors.success : AppColors.containerDark,
-          onTap: () => context.pushNamed(OfflineScreen.name),
+          label: latenciaGoogle != null ? '$latenciaGoogle ms' : '--',
+          subLabel: 'Lat. Google',
+          color: latenciaGoogle != null ? AppColors.success : AppColors.containerDark,
         )),
         Expanded(child: _MetricItem(
           svgAsset: AppAssets.toolsClockSpeed,
@@ -414,7 +428,7 @@ class _MenuGrid extends StatelessWidget {
           svgAsset: AppAssets.toolsDocText,
           title: 'Historial',
           subtitle: 'Ver diagnósticos',
-          onTap: () => context.pushNamed(MenuGridScreen.name),
+          onTap: () => context.pushNamed(HistorialScreen.name),
         ),
         _MenuCard(
           svgAsset: AppAssets.toolsGamingPad,
@@ -456,7 +470,7 @@ class _MenuCard extends StatelessWidget {
           children: [
             SvgPicture.asset(
               svgAsset,
-              colorFilter: const ColorFilter.mode(Colors.white70, BlendMode.srcIn),
+              colorFilter: const ColorFilter.mode(AppColors.iconSecondary, BlendMode.srcIn),
               width: 35,
               height: 35,
             ),

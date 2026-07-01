@@ -2,48 +2,40 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tvapp/core/theme/app_colors.dart';
-import 'package:tvapp/ui/shared/constants/app_assets.dart';
 import 'package:tvapp/core/domain/entities/tools/servidor_juego.dart';
 import 'package:tvapp/ui/providers/tools/gaming_server_providers.dart';
+import 'package:tvapp/ui/providers/tools/gaming_monitor_service.dart';
+import 'package:tvapp/ui/shared/widgets/juego_logo_widget.dart';
+import 'package:tvapp/ui/shared/widgets/app_loading.dart';
 
 class GamingScreen extends ConsumerWidget {
   static const String name = 'Gaming';
 
   const GamingScreen({super.key});
 
-  String _gameNameToId(String name) {
-    final lower = name.toLowerCase();
-    if (lower.contains('counter')) return 'cs2';
-    if (lower.contains('dota')) return 'dota2';
-    if (lower.contains('fortnite')) return 'fortnite';
-    if (lower.contains('valorant')) return 'valorant';
-    if (lower.contains('pubg')) return 'pubg';
-    return name;
-  }
-
-  String? _logoForJuego(String juego) {
-    final lower = juego.toLowerCase();
-    if (lower.contains('counter')) return AppAssets.logoCs2;
-    if (lower.contains('dota')) return AppAssets.logoDota2;
-    if (lower.contains('fortnite')) return AppAssets.logoFortnite;
-    if (lower.contains('valorant')) return AppAssets.logoValorant;
-    if (lower.contains('pubg')) return AppAssets.logoPubg;
-    return null;
-  }
-
   Color _colorForEstado(String estado) {
     switch (estado) {
-      case 'EXCELENTE': return AppColors.success;
-      case 'BUENO': return Colors.amber;
-      case 'MALO': return Colors.orange;
-      case 'SIN_CONEXIÓN': return AppColors.error;
-      default: return Colors.grey;
+      case 'EXCELENTE':
+        return AppColors.success;
+      case 'BUENO':
+        return Colors.amber;
+      case 'MALO':
+        return Colors.orange;
+      case 'SIN_CONEXIÓN':
+        return AppColors.error;
+      default:
+        return Colors.grey;
     }
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final servidoresAsync = ref.watch(servidoresJuegoProvider);
+    // Carga datos desde la API (path original que funciona, refresca cada 10s)
+    ref.watch(servidoresJuegoProvider);
+    // Activa el monitor; Riverpod lo destruye al salir de la pantalla
+    ref.watch(gamingListMonitorProvider);
+    // Stream reactivo: recibe datos iniciales + actualizaciones de ping del monitor
+    final servidoresAsync = ref.watch(servidoresJuegoStreamProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -74,7 +66,10 @@ class GamingScreen extends ConsumerWidget {
             const SizedBox(height: 20),
             const Text(
               'Gaming',
-              style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold),
             ),
             const Text(
               'Optimizado para competitivos',
@@ -84,15 +79,16 @@ class GamingScreen extends ConsumerWidget {
             servidoresAsync.when(
               data: (servidores) => _GamesListCard(
                 servidores: servidores,
-                onGameTap: (sv) => context.push('/tools/gaming/detail', extra: sv.id),
-                logoForJuego: _logoForJuego,
+                onGameTap: (sv) =>
+                    context.push('/tools/gaming/detail', extra: sv.id),
                 colorForEstado: _colorForEstado,
               ),
               loading: () => const Padding(
-                padding: EdgeInsets.all(40),
-                child: CircularProgressIndicator(color: Color.fromARGB(255, 210, 7, 0)),
+                padding: EdgeInsets.symmetric(vertical: 40),
+                child: AppLoading(message: 'Cargando servidores...'),
               ),
-              error: (err, _) => Text('Error: $err', style: const TextStyle(color: Colors.red)),
+              error: (err, _) =>
+                  Text('Error: $err', style: const TextStyle(color: Colors.red)),
             ),
             const SizedBox(height: 40),
           ],
@@ -105,20 +101,19 @@ class GamingScreen extends ConsumerWidget {
 class _GamesListCard extends StatelessWidget {
   final List<ServidorJuego> servidores;
   final void Function(ServidorJuego) onGameTap;
-  final String? Function(String) logoForJuego;
   final Color Function(String) colorForEstado;
 
   const _GamesListCard({
     required this.servidores,
     required this.onGameTap,
-    required this.logoForJuego,
     required this.colorForEstado,
   });
 
   @override
   Widget build(BuildContext context) {
     if (servidores.isEmpty) {
-      return const Text('No hay servidores disponibles', style: TextStyle(color: AppColors.textBody));
+      return const Text('No hay servidores disponibles',
+          style: TextStyle(color: AppColors.textBody));
     }
     return Container(
       padding: const EdgeInsets.all(20),
@@ -127,13 +122,13 @@ class _GamesListCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(25),
       ),
       child: Column(
-        children: servidores.map((sv) => _GameRow(
-          servidor: sv,
-          onTap: () => onGameTap(sv),
-          logoPath: logoForJuego(sv.juego),
-          statusColor: colorForEstado(sv.estado),
-        )).toList(),
-
+        children: servidores
+            .map((sv) => _GameRow(
+                  servidor: sv,
+                  onTap: () => onGameTap(sv),
+                  statusColor: colorForEstado(sv.estado),
+                ))
+            .toList(),
       ),
     );
   }
@@ -142,13 +137,11 @@ class _GamesListCard extends StatelessWidget {
 class _GameRow extends StatelessWidget {
   final ServidorJuego servidor;
   final VoidCallback onTap;
-  final String? logoPath;
   final Color statusColor;
 
   const _GameRow({
     required this.servidor,
     required this.onTap,
-    required this.logoPath,
     required this.statusColor,
   });
 
@@ -170,16 +163,7 @@ class _GameRow extends StatelessWidget {
               ),
               padding: const EdgeInsets.all(6),
               alignment: Alignment.center,
-              child: logoPath != null
-                  ? Image.asset(
-                      logoPath!,
-                      width: 45,
-                      height: 45,
-                      fit: BoxFit.contain,
-                      errorBuilder: (_, __, ___) =>
-                          const Icon(Icons.sports_esports, color: Colors.grey),
-                    )
-                  : const Icon(Icons.sports_esports, color: Colors.grey, size: 30),
+              child: JuegoLogoWidget(logo: servidor.logo, size: 33),
             ),
             const SizedBox(width: 15),
             Expanded(
@@ -188,18 +172,25 @@ class _GameRow extends StatelessWidget {
                 children: [
                   Text(
                     servidor.juego,
-                    style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold),
                   ),
                   Text(
                     'Ver Latencia',
-                    style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12),
+                    style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.5), fontSize: 12),
                   ),
                 ],
               ),
             ),
             Text(
               '${servidor.pingMs} ms',
-              style: TextStyle(color: statusColor, fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                  color: statusColor,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold),
             ),
           ],
         ),

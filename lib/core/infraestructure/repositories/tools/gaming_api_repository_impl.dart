@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'i_gaming_repository.dart';
 import 'package:tvapp/core/domain/entities/tools/servidor_juego.dart';
-import 'package:tvapp/core/infraestructure/datasource/tools/tools_api_client.dart';
+import 'package:tvapp/core/infraestructure/datasource/tools/i_tools_api_datasource.dart';
 
 class GamingApiRepositoryImpl implements IGamingRepository {
-  final ToolsApiClient _api;
+  final IToolsApiDatasource _api;
   final _streamController = StreamController<List<ServidorJuego>>.broadcast();
   List<ServidorJuego> _servidores = [];
 
@@ -14,20 +14,37 @@ class GamingApiRepositoryImpl implements IGamingRepository {
   Future<List<ServidorJuego>> getServidores() async {
     final data = await _api.get('/v1/gaming/servers');
     final list = data['servidores'] as List<dynamic>;
-    _servidores = list
-        .map((e) => ServidorJuego(
-              id: e['id'] as String,
-              juego: e['juego'] as String,
-              servidor: e['servidor'] as String,
-              ubicacion: e['ubicacion'] as String,
-              pingMs: e['ping_ms'] as int,
-              jitterMs: e['jitter_ms'] as int,
-              perdidaPaquetesPct: (e['perdida_paquetes_pct'] as num).toDouble(),
-              estado: e['estado'] as String,
-            ))
-        .toList();
+    _servidores = list.map((e) {
+      final id = e['id'] as String;
+      final existing = _servidores.firstWhere(
+        (s) => s.id == id,
+        orElse: () => ServidorJuego(id: id, juego: '', servidor: '', ubicacion: '', ip: ''),
+      );
+      return ServidorJuego(
+        id: id,
+        juego: e['juego'] as String,
+        servidor: e['servidor'] as String,
+        ubicacion: e['ubicacion'] as String,
+        ip: e['ip'] as String,
+        logo: e['logo'] as String? ?? '',
+        pingMs: existing.pingMs,
+        jitterMs: existing.jitterMs,
+        perdidaPaquetesPct: existing.perdidaPaquetesPct,
+        estado: existing.estado,
+      );
+    }).toList();
     _streamController.add(List.from(_servidores));
     return _servidores;
+  }
+
+  List<ServidorJuego> get currentServidores => List.from(_servidores);
+
+  ServidorJuego? getServidorById(String id) {
+    try {
+      return _servidores.firstWhere((s) => s.id == id);
+    } catch (_) {
+      return null;
+    }
   }
 
   void updateMetrics({
@@ -48,7 +65,10 @@ class GamingApiRepositoryImpl implements IGamingRepository {
     }
   }
 
-  Stream<List<ServidorJuego>> watchServidores() => _streamController.stream;
+  Stream<List<ServidorJuego>> watchServidores() async* {
+    if (_servidores.isNotEmpty) yield List.from(_servidores);
+    yield* _streamController.stream;
+  }
 
   String _calcEstado(int pingMs) {
     if (pingMs == 0) return 'SIN_CONEXIÓN';

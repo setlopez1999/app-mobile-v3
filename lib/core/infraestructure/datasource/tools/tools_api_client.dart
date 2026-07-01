@@ -2,10 +2,11 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'i_tools_api_datasource.dart';
 
 /// Cliente HTTP dedicado para los endpoints de herramientas de red (tools).
 /// Lee el token JWT de la misma clave SharedPreferences que usa el auth de la app ('data').
-class ToolsApiClient {
+class ToolsApiClient implements IToolsApiDatasource {
   static final ToolsApiClient _instance = ToolsApiClient._internal();
   factory ToolsApiClient() => _instance;
   ToolsApiClient._internal();

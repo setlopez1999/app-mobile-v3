@@ -9,6 +9,7 @@ abstract class Diagnostico with _$Diagnostico {
     required String id,
     required DateTime fecha,
     required int latenciaIspMs,
+    @Default(null) int? latenciaGoogleMs,
     required double velocidadBajadaMbps,
     required String resultado,
   }) = _Diagnostico;

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:tvapp/core/theme/app_colors.dart';
 import 'package:tvapp/core/domain/entities/tools/servidor_juego.dart';
 import 'package:tvapp/ui/providers/tools/gaming_server_providers.dart';
+import 'package:tvapp/ui/providers/tools/gaming_monitor_service.dart';
 
 class GamingDetailScreen extends ConsumerStatefulWidget {
   static const String name = 'Gaming Detail';
@@ -49,7 +50,8 @@ class _GamingDetailScreenState extends ConsumerState<GamingDetailScreen>
 
   @override
   Widget build(BuildContext context) {
-    final servidoresAsync = ref.watch(servidoresJuegoProvider);
+    ref.watch(gamingMonitorProvider(widget.gameId));
+    final servidoresAsync = ref.watch(servidoresJuegoStreamProvider);
 
     return servidoresAsync.when(
       loading: () => Scaffold(

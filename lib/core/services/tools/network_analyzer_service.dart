@@ -47,9 +47,6 @@ class NetworkAnalyzerService {
   }
 
   Future<PingResult> ping(String host, {int count = 4}) async {
-    if (Platform.isAndroid || Platform.isIOS) {
-      return _pingViaTcp(host, count: count);
-    }
     try {
       final isWindows = Platform.isWindows;
       final args = isWindows
@@ -67,52 +64,6 @@ class NetworkAnalyzerService {
     } catch (e) {
       return PingResult.failure();
     }
-  }
-
-  // TCP-based ping for mobile (ICMP requires root on Android/iOS)
-  Future<PingResult> _pingViaTcp(String host, {int count = 4}) async {
-    const testPorts = [443, 80, 8080];
-    final rtts = <double>[];
-
-    for (int i = 0; i < count; i++) {
-      final sw = Stopwatch()..start();
-      bool gotRtt = false;
-      for (final port in testPorts) {
-        Socket? socket;
-        try {
-          socket = await Socket.connect(host, port,
-              timeout: const Duration(seconds: 3));
-          socket.destroy();
-          gotRtt = true;
-        } on SocketException {
-          // Connection refused = RST from server = valid RTT
-          gotRtt = sw.elapsedMilliseconds < 2800;
-        } catch (_) {
-          // Timeout = packet lost, try next port
-        } finally {
-          socket?.destroy();
-        }
-        if (gotRtt) break;
-      }
-      sw.stop();
-      if (gotRtt && sw.elapsedMilliseconds < 3000) {
-        rtts.add(sw.elapsedMilliseconds.toDouble());
-      }
-    }
-
-    if (rtts.isEmpty) return PingResult.failure();
-
-    final avg = rtts.reduce((a, b) => a + b) / rtts.length;
-    final loss = (count - rtts.length) / count * 100;
-    double jitter = 0;
-    if (rtts.length > 1) {
-      final variance =
-          rtts.map((x) => pow(x - avg, 2)).reduce((a, b) => a + b) /
-              rtts.length;
-      jitter = sqrt(variance);
-    }
-    return PingResult(
-        avgPing: avg, lossPercent: loss, jitter: jitter, success: true);
   }
 
   PingResult _parsePingOutput(String output, bool isWindows) {
@@ -178,14 +129,12 @@ class NetworkAnalyzerService {
 
   Future<SpeedTestResult> runSpeedTest({String? serverBaseUrl}) async {
     double downloadMbps = 0;
-    String source = 'none';
     try {
-      downloadMbps = await _measureDownloadCloudflare();
-      if (downloadMbps > 0) {
-        source = 'Cloudflare';
-      } else {
-        downloadMbps = await _measureDownloadOvh();
-        if (downloadMbps > 0) source = 'OVH';
+      // 3 parallel streaming connections, 5 seconds fixed
+      downloadMbps = await _measureDownloadParallel();
+      if (downloadMbps == 0) {
+        // Fallback: OVH single stream
+        downloadMbps = await _measureDownloadOvhStream();
       }
     } catch (e) {
       debugPrint('[Speedtest] Download error: $e');
@@ -193,71 +142,115 @@ class NetworkAnalyzerService {
 
     double uploadMbps = 0;
     try {
-      uploadMbps = await _measureUploadCloudflare();
+      uploadMbps = await _measureUpload();
     } catch (e) {
       debugPrint('[Speedtest] Upload error: $e');
     }
 
-    debugPrint('[Speedtest] ↓${downloadMbps.toStringAsFixed(1)} ↑${uploadMbps.toStringAsFixed(1)} Mbps ($source)');
+    debugPrint('[Speedtest] ↓${downloadMbps.toStringAsFixed(1)} ↑${uploadMbps.toStringAsFixed(1)} Mbps');
     return SpeedTestResult(downloadMbps: downloadMbps, uploadMbps: uploadMbps);
   }
 
-  Future<double> _measureDownloadCloudflare() async {
-    // Larger files give more accurate readings by amortizing TCP slow-start
-    const sizes = [25, 10, 5];
-    for (final mb in sizes) {
-      try {
-        final uri = Uri.parse('https://speed.cloudflare.com/__down?bytes=${mb * 1000000}');
-        final sw = Stopwatch()..start();
-        final resp = await http.get(uri).timeout(const Duration(seconds: 25));
-        sw.stop();
-        final sec = sw.elapsedMilliseconds / 1000.0;
-        if (sec <= 0) continue;
-        final mbps = (resp.bodyBytes.length * 8) / (sec * 1000000);
-        debugPrint('[Speedtest] CF ${mb}MB → ${mbps.toStringAsFixed(2)} Mbps');
-        if (mbps > 0) return mbps;
-      } catch (e) {
-        debugPrint('[Speedtest] CF ${mb}MB failed: $e');
-      }
-    }
-    return 0;
-  }
+  /// 3 conexiones paralelas en stream, corte exacto a los 5 segundos.
+  /// Suma los bytes de todas las conexiones → mucho más preciso en redes rápidas.
+  Future<double> _measureDownloadParallel() async {
+    const testDuration = Duration(seconds: 5);
+    const parallelConnections = 3;
+    // 100 MB nominal — nunca termina en 5s; el timer corta la conexión
+    const url = 'https://speed.cloudflare.com/__down?bytes=100000000';
 
-  Future<double> _measureDownloadOvh() async {
-    // Reliable public files hosted by OVH as fallback when Cloudflare is unreachable
-    const files = [('10Mb.dat', 10), ('1Mb.dat', 1)];
-    for (final (file, mb) in files) {
-      try {
-        final uri = Uri.parse('https://proof.ovh.net/files/$file');
-        final sw = Stopwatch()..start();
-        final resp = await http.get(uri).timeout(const Duration(seconds: 25));
-        sw.stop();
-        final sec = sw.elapsedMilliseconds / 1000.0;
-        if (sec <= 0) continue;
-        final mbps = (resp.bodyBytes.length * 8) / (sec * 1000000);
-        debugPrint('[Speedtest] OVH ${mb}MB → ${mbps.toStringAsFixed(2)} Mbps');
-        if (mbps > 0) return mbps;
-      } catch (e) {
-        debugPrint('[Speedtest] OVH $file failed: $e');
-      }
-    }
-    return 0;
-  }
-
-  Future<double> _measureUploadCloudflare() async {
-    // 2 MB is enough for an accurate reading without a large RAM spike on mobile
-    const uploadBytes = 2 * 1024 * 1024;
-    final data = List<int>.generate(uploadBytes, (_) => Random().nextInt(256));
-    final uri = Uri.parse('https://speed.cloudflare.com/__up');
     final sw = Stopwatch()..start();
-    await http
-        .post(uri, body: data, headers: {'Content-Type': 'application/octet-stream'})
-        .timeout(const Duration(seconds: 25));
+    final bytesList = await Future.wait(
+      List.generate(parallelConnections, (_) => _streamDownload(url, testDuration)),
+    );
     sw.stop();
+
+    final totalBytes = bytesList.fold(0, (sum, b) => sum + b);
+    if (totalBytes == 0) return 0;
+
     final sec = sw.elapsedMilliseconds / 1000.0;
-    if (sec <= 0) return 0;
+    final mbps = (totalBytes * 8) / (sec * 1000000);
+    debugPrint('[Speedtest] CF parallel: ${mbps.toStringAsFixed(2)} Mbps '
+        '(${(totalBytes / 1024 / 1024).toStringAsFixed(1)} MB / ${sec.toStringAsFixed(1)}s)');
+    return mbps;
+  }
+
+  /// Stream individual con CancelToken — acumula bytes hasta que el timer corta.
+  Future<int> _streamDownload(String url, Duration duration) async {
+    final cancelToken = CancelToken();
+    int bytes = 0;
+
+    final timer = Timer(duration, () {
+      if (!cancelToken.isCancelled) cancelToken.cancel('timeout');
+    });
+
+    try {
+      final response = await _dio.get<ResponseBody>(
+        url,
+        options: Options(
+          responseType: ResponseType.stream,
+          receiveTimeout: duration + const Duration(seconds: 3),
+        ),
+        cancelToken: cancelToken,
+      );
+
+      if (response.statusCode != 200 || response.data == null) return 0;
+
+      await for (final chunk in response.data!.stream) {
+        bytes += chunk.length;
+      }
+    } on DioException catch (e) {
+      if (!CancelToken.isCancel(e)) {
+        debugPrint('[Speedtest] Stream DioException: ${e.message}');
+      }
+      // Cancel por timer es esperado — bytes acumulados son válidos
+    } catch (e) {
+      debugPrint('[Speedtest] Stream error: $e');
+    } finally {
+      timer.cancel();
+    }
+
+    return bytes;
+  }
+
+  /// Fallback OVH: stream único con corte a los 8 segundos.
+  Future<double> _measureDownloadOvhStream() async {
+    const testDuration = Duration(seconds: 8);
+    const url = 'https://proof.ovh.net/files/10Mb.dat';
+
+    final sw = Stopwatch()..start();
+    final bytes = await _streamDownload(url, testDuration);
+    sw.stop();
+
+    if (bytes == 0) return 0;
+    final sec = sw.elapsedMilliseconds / 1000.0;
+    final mbps = (bytes * 8) / (sec * 1000000);
+    debugPrint('[Speedtest] OVH fallback: ${mbps.toStringAsFixed(2)} Mbps');
+    return mbps;
+  }
+
+  /// Upload: Uint8List de 2 MB (zeros — generación instantánea, sin Random overhead).
+  Future<double> _measureUpload() async {
+    const uploadBytes = 2 * 1024 * 1024;
+    final data = Uint8List(uploadBytes); // zeros, instantáneo
+
+    final sw = Stopwatch()..start();
+    try {
+      await http.post(
+        Uri.parse('https://speed.cloudflare.com/__up'),
+        body: data,
+        headers: {'Content-Type': 'application/octet-stream'},
+      ).timeout(const Duration(seconds: 20));
+    } catch (e) {
+      debugPrint('[Speedtest] Upload error: $e');
+    }
+    sw.stop();
+
+    final sec = sw.elapsedMilliseconds / 1000.0;
+    // Si tardó >= 20s es un timeout, no una medición válida
+    if (sec <= 0 || sec >= 20) return 0;
     final mbps = (uploadBytes * 8) / (sec * 1000000);
-    debugPrint('[Speedtest] CF upload → ${mbps.toStringAsFixed(2)} Mbps');
+    debugPrint('[Speedtest] Upload: ${mbps.toStringAsFixed(2)} Mbps en ${sec.toStringAsFixed(1)}s');
     return mbps;
   }
 }

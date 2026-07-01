@@ -31,6 +31,10 @@ class Environment {
   /// Tools API (Check Health, Diagnostico, Gaming, etc.)
   static String toolsBaseUrl = dotenv.env['TOOLS_BASE_URL'] ?? 'http://serverpruebabryan.com.cd-latam.com';
 
+  /// Gradient colors (wifi status card)
+  static Color gradientColor1 = HexColor(dotenv.env['GRADIENT_COLOR_1'] ?? '00CC66');
+  static Color gradientColor2 = HexColor(dotenv.env['GRADIENT_COLOR_2'] ?? '004E92');
+
   /// Theme config
   static Color lightThemeColor = HexColor(dotenv.env['LIGHT_THEME_COLOR']!);
   static Color darkThemeColor = HexColor(dotenv.env['DARK_THEME_COLOR']!);

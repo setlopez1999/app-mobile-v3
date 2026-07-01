@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tvapp/core/theme/app_colors.dart';
 import 'package:tvapp/ui/providers/tools/chat_provider.dart';
+import 'package:tvapp/ui/shared/widgets/app_loading.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
   static const String name = 'Chat';
@@ -29,7 +30,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     });
   }
 
-  void _sendMessage() {
+  void _sendMessage(bool isSending) {
+    if (isSending) return;
     final text = _controller.text.trim();
     if (text.isEmpty) return;
     _controller.clear();
@@ -46,13 +48,20 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final messages = ref.watch(chatProvider);
-    ref.listen(chatProvider, (_, __) => _scrollToBottom());
+    final asyncMessages = ref.watch(chatProvider);
+    final msgs = asyncMessages.asData?.value ?? [];
+    final isSending = msgs.isNotEmpty && !msgs.last.isUser && msgs.last.text == '...';
+
+    ref.listen(chatProvider, (_, next) {
+      if (next.hasValue) _scrollToBottom();
+    });
 
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
+        scrolledUnderElevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => context.canPop() ? context.pop() : context.go('/'),
@@ -64,32 +73,37 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.delete_outline, color: Colors.white),
-            onPressed: () => ref.read(chatProvider.notifier).clearChat(),
+            onPressed: isSending ? null : () => ref.read(chatProvider.notifier).clearChat(),
           ),
         ],
       ),
       body: Column(
         children: [
           Expanded(
-            child: ListView.builder(
-              controller: _scrollController,
-              padding: const EdgeInsets.all(20),
-              itemCount: messages.length,
-              itemBuilder: (context, index) {
-                final message = messages[index];
-                final isLast = index == messages.length - 1;
-                return Padding(
-                  padding: EdgeInsets.only(bottom: isLast ? 0 : 20),
-                  child: message.isUser
-                      ? _UserBubble(text: message.text)
-                      : _BotBubble(text: message.text),
-                );
-              },
+            child: asyncMessages.when(
+              loading: () => const AppLoading(message: 'Cargando historial...'),
+              error: (_, __) => const AppLoading(message: 'Error al cargar el historial'),
+              data: (messages) => ListView.builder(
+                controller: _scrollController,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                itemCount: messages.length,
+                itemBuilder: (context, index) {
+                  final message = messages[index];
+                  final isLast = index == messages.length - 1;
+                  return Padding(
+                    padding: EdgeInsets.only(bottom: isLast ? 0 : 16),
+                    child: message.isUser
+                        ? _UserBubble(text: message.text)
+                        : _BotBubble(text: message.text),
+                  );
+                },
+              ),
             ),
           ),
           _ChatInputBar(
             controller: _controller,
-            onSend: _sendMessage,
+            isSending: isSending,
+            onSend: () => _sendMessage(isSending),
           ),
         ],
       ),
@@ -109,19 +123,19 @@ class _UserBubble extends StatelessWidget {
       children: [
         Flexible(
           child: Container(
-            padding: const EdgeInsets.all(15),
+            padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: const Color(0xFF32324A),
-              borderRadius: BorderRadius.circular(15).copyWith(topRight: Radius.zero),
+              color: AppColors.container,
+              borderRadius: BorderRadius.circular(16).copyWith(topRight: Radius.zero),
             ),
-            child: Text(text, style: const TextStyle(color: AppColors.textBody)),
+            child: Text(text, style: const TextStyle(color: Colors.white)),
           ),
         ),
-        const SizedBox(width: 10),
+        const SizedBox(width: 8),
         const CircleAvatar(
-          backgroundColor: Colors.white,
-          radius: 20,
-          child: Icon(Icons.person, color: Colors.black, size: 20),
+          backgroundColor: AppColors.accentBlue,
+          radius: 18,
+          child: Icon(Icons.person, color: Colors.white, size: 18),
         ),
       ],
     );
@@ -140,23 +154,26 @@ class _BotBubble extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const CircleAvatar(
-          backgroundColor: Color(0xFF7B61FF),
-          radius: 20,
-          child: Icon(Icons.smart_toy_outlined, color: Colors.white, size: 20),
+          backgroundColor: AppColors.accentBlue,
+          radius: 18,
+          child: Icon(Icons.smart_toy_outlined, color: Colors.white, size: 18),
         ),
-        const SizedBox(width: 10),
+        const SizedBox(width: 8),
         Flexible(
           child: Container(
-            padding: const EdgeInsets.all(15),
+            padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: const Color(0xFF32324A),
-              borderRadius: BorderRadius.circular(15).copyWith(topLeft: Radius.zero),
+              color: AppColors.container,
+              borderRadius: BorderRadius.circular(16).copyWith(topLeft: Radius.zero),
             ),
             child: isTyping
                 ? const SizedBox(
                     width: 20,
                     height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF7B61FF)),
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: AppColors.accentBlue,
+                    ),
                   )
                 : Text(text, style: const TextStyle(color: AppColors.textBody)),
           ),
@@ -169,39 +186,68 @@ class _BotBubble extends StatelessWidget {
 class _ChatInputBar extends StatelessWidget {
   final TextEditingController controller;
   final VoidCallback onSend;
+  final bool isSending;
 
-  const _ChatInputBar({required this.controller, required this.onSend});
+  const _ChatInputBar({
+    required this.controller,
+    required this.onSend,
+    required this.isSending,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(30),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: TextField(
-                controller: controller,
-                textInputAction: TextInputAction.send,
-                style: const TextStyle(color: Colors.black),
-                decoration: const InputDecoration(
-                  hintText: 'Escribe un mensaje...',
-                  hintStyle: TextStyle(color: Colors.grey),
-                  border: InputBorder.none,
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+        child: Container(
+          decoration: BoxDecoration(
+            color: AppColors.container,
+            borderRadius: BorderRadius.circular(30),
+            border: Border.all(
+              color: isSending
+                  ? Colors.white12
+                  : AppColors.accentBlue.withValues(alpha: 0.4),
+            ),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: controller,
+                  textInputAction: TextInputAction.send,
+                  enabled: !isSending,
+                  // Texto siempre blanco sobre fondo oscuro del container
+                  style: const TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: isSending ? 'Esperando respuesta...' : 'Escribe un mensaje...',
+                    hintStyle: const TextStyle(color: AppColors.textBody),
+                    border: InputBorder.none,
+                    // Anula el filled:true del inputDecorationTheme global
+                    // para que no sobreescriba el fondo oscuro del container
+                    filled: true,
+                    fillColor: Colors.transparent,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 18,
+                      vertical: 14,
+                    ),
+                  ),
+                  onSubmitted: (_) => onSend(),
                 ),
-                onSubmitted: (_) => onSend(),
               ),
-            ),
-            IconButton(
-              icon: const Icon(Icons.send_outlined, color: Color(0xFF7B61FF)),
-              onPressed: onSend,
-            ),
-          ],
+              Padding(
+                padding: const EdgeInsets.only(right: 6),
+                child: AnimatedOpacity(
+                  opacity: isSending ? 0.3 : 1.0,
+                  duration: const Duration(milliseconds: 200),
+                  child: IconButton(
+                    icon: const Icon(Icons.send_rounded, color: AppColors.accentBlue),
+                    onPressed: isSending ? null : onSend,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

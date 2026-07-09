@@ -19,6 +19,9 @@ class DiagnosticoRepositoryImpl implements DiagnosticoRepository {
               latenciaGoogleMs: e['latencia_google_ms'] as int?,
               velocidadBajadaMbps: (e['velocidad_bajada_mbps'] as num).toDouble(),
               resultado: e['resultado'] as String,
+              wifiSsid: e['wifi_ssid'] as String?,
+              wifiSenialDbm: (e['wifi_signal_dbm'] as num?)?.round(),
+              wifiBanda: e['wifi_banda'] as String?,
             ))
         .toList();
   }
@@ -35,6 +38,9 @@ class DiagnosticoRepositoryImpl implements DiagnosticoRepository {
         'velocidad_subida_mbps': req.velocidadSubidaMbps,
         'fibra_potencia_dbm': req.fibraPotenciaDbm,
         'fibra_estado': req.fibraEstado,
+        'wifi_ssid': req.wifiSsid,
+        'wifi_signal_dbm': req.wifiSenialDbm,
+        'wifi_banda': req.wifiBanda,
       },
     );
     return DiagnosticoSaveResult(

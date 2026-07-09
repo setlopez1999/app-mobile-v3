@@ -127,6 +127,69 @@ class NetworkAnalyzerService {
     }
   }
 
+  /// Latencia real vía HTTP HEAD — a diferencia de `ping`, funciona igual en
+  /// Android e iOS (Process.run no está disponible en iOS).
+  ///
+  /// Usa mediana (no promedio) para que un solo pico aislado no distorsione
+  /// el resultado, y separa los intentos ~150ms para que no sean una sola ráfaga.
+  Future<PingResult> checkHttpLatency(String url, {int attempts = 5}) async {
+    final rtts = <double>[];
+
+    for (var i = 0; i < attempts; i++) {
+      final ms = await _measureHttpHead(url);
+      if (ms != null) rtts.add(ms);
+      if (i < attempts - 1) {
+        await Future.delayed(const Duration(milliseconds: 150));
+      }
+    }
+
+    if (rtts.isEmpty) return PingResult.failure();
+
+    final medianPing = _median(rtts);
+    final lossPercent = ((attempts - rtts.length) / attempts) * 100;
+
+    double jitter = 0;
+    if (rtts.length > 1) {
+      final mean = rtts.reduce((a, b) => a + b) / rtts.length;
+      final variance =
+          rtts.map((x) => pow(x - mean, 2)).reduce((a, b) => a + b) /
+              rtts.length;
+      jitter = sqrt(variance);
+    }
+
+    return PingResult(
+      avgPing: medianPing,
+      lossPercent: lossPercent,
+      jitter: jitter,
+      success: true,
+    );
+  }
+
+  double _median(List<double> values) {
+    final sorted = [...values]..sort();
+    final mid = sorted.length ~/ 2;
+    if (sorted.length.isOdd) return sorted[mid];
+    return (sorted[mid - 1] + sorted[mid]) / 2;
+  }
+
+  Future<double?> _measureHttpHead(String url) async {
+    final stopwatch = Stopwatch()..start();
+    try {
+      await _dio.head(
+        url,
+        options: Options(
+          sendTimeout: const Duration(seconds: 5),
+          receiveTimeout: const Duration(seconds: 5),
+        ),
+      );
+      stopwatch.stop();
+      return stopwatch.elapsedMilliseconds.toDouble();
+    } catch (_) {
+      stopwatch.stop();
+      return null;
+    }
+  }
+
   Future<SpeedTestResult> runSpeedTest({String? serverBaseUrl}) async {
     double downloadMbps = 0;
     try {

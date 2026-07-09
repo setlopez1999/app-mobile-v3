@@ -8,6 +8,7 @@ import 'package:tvapp/core/services/local_device_service.dart';
 import 'package:tvapp/storage/tools/local_storage.dart';
 import 'diagnostico_providers.dart';
 import 'fibra_providers.dart';
+import 'wifi_notifier.dart';
 
 enum DiagnosticoStep {
   idle,
@@ -99,18 +100,19 @@ class DiagnosticoState {
 
 // ── Clasificadores ────────────────────────────────────────────────────────────
 
+// Umbrales recalibrados para HTTP HEAD (checkHttpLatency): incluye handshake
+// TCP+TLS, siempre da más ms que un ping ICMP crudo. Menos ms = mejor, 0 = ideal.
 ItemCalidad _calidadLatenciaGoogle(int ms) {
   if (ms <= 0) return ItemCalidad.fallido;
-  if (ms < 50) return ItemCalidad.bueno;
-  if (ms < 150) return ItemCalidad.regular;
+  if (ms < 100) return ItemCalidad.bueno;
+  if (ms < 250) return ItemCalidad.regular;
   return ItemCalidad.malo;
 }
 
-// ISP usa TCP → umbrales más relajados que ICMP
 ItemCalidad _calidadLatenciaIsp(int ms) {
   if (ms <= 0) return ItemCalidad.fallido;
-  if (ms < 50) return ItemCalidad.bueno;
-  if (ms < 150) return ItemCalidad.regular;
+  if (ms < 100) return ItemCalidad.bueno;
+  if (ms < 250) return ItemCalidad.regular;
   return ItemCalidad.malo;
 }
 
@@ -143,6 +145,16 @@ class DiagnosticoNotifier extends Notifier<DiagnosticoState> {
         localDeviceService: ref.read(localDeviceServiceProvider),
         diagnosticoRepo: ref.read(diagnosticoRepositoryProvider),
         fibraRepo: ref.read(fibraRepositoryProvider),
+        wifiRepo: ref.read(wifiRepositoryProvider),
+      );
+
+      // Se ejecutan en orden por dentro, pero mostramos las 4 tarjetas "cargando"
+      // desde el inicio para dar la impresión de que corren al mismo tiempo.
+      state = state.copyWith(
+        calidadGoogle: ItemCalidad.cargando,
+        calidadIsp: ItemCalidad.cargando,
+        calidadVelocidad: ItemCalidad.cargando,
+        calidadFibra: ItemCalidad.cargando,
       );
 
       final result = await useCase.execute(

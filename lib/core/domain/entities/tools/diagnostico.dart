@@ -12,6 +12,9 @@ abstract class Diagnostico with _$Diagnostico {
     @Default(null) int? latenciaGoogleMs,
     required double velocidadBajadaMbps,
     required String resultado,
+    String? wifiSsid,
+    int? wifiSenialDbm,
+    String? wifiBanda,
   }) = _Diagnostico;
 
   factory Diagnostico.fromJson(Map<String, dynamic> json) => _$DiagnosticoFromJson(json);
@@ -27,6 +30,9 @@ abstract class DiagnosticoRequest with _$DiagnosticoRequest {
     required double velocidadSubidaMbps,
     required String fibraPotenciaDbm,
     required String fibraEstado,
+    String? wifiSsid,
+    int? wifiSenialDbm,
+    String? wifiBanda,
   }) = _DiagnosticoRequest;
 
   factory DiagnosticoRequest.fromJson(Map<String, dynamic> json) =>

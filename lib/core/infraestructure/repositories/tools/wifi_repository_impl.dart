@@ -1,4 +1,5 @@
 import 'wifi_repository.dart';
+import 'package:tvapp/core/domain/entities/tools/wifi_info.dart';
 import 'package:tvapp/core/infraestructure/datasource/tools/tools_api_client.dart';
 import 'package:tvapp/storage/tools/local_storage.dart';
 
@@ -38,5 +39,16 @@ class WifiRepositoryImpl implements WifiRepository {
   Future<String?> getSsid() async {
     final data = await _api.get('/v1/wifi/ssid');
     return data['ssid'] as String?;
+  }
+
+  @override
+  Future<WifiInfo> getWifiStatus() async {
+    final data = await _api.get('/v1/wifi/ssid');
+    return WifiInfo(
+      ssid: data['ssid'] as String?,
+      signalStrengthDbm: (data['signal_dbm'] as num?)?.round(),
+      bandOverride: data['band'] as String?,
+      signalQualityOverride: data['signal_quality'] as String?,
+    );
   }
 }

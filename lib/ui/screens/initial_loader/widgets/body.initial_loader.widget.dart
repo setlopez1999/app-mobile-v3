@@ -5,7 +5,7 @@ import 'package:tvapp/config/environment/environment.dart';
 import 'package:tvapp/core/application/states/auth/auth_state.dart';
 import 'package:tvapp/ui/providers/auth/auth_provider.dart';
 import 'package:tvapp/ui/screens/home/home.screen.dart';
-import 'package:tvapp/ui/screens/menu/menu_grid.screen.dart';
+import 'package:tvapp/ui/screens/main/main.screen.dart';
 import 'package:tvapp/ui/screens/login/login.screen.dart';
 
 class BodyWidget extends ConsumerStatefulWidget {
@@ -47,7 +47,7 @@ class _BodyWidgetState extends ConsumerState<BodyWidget> {
 
         ref.read(authProvider).maybeWhen(
             success: (user) {
-              context.replaceNamed(MenuGridScreen.name);
+              context.replaceNamed(MainScreen.name);
             },
             orElse: () {
               context.replaceNamed(LoginScreen.name);

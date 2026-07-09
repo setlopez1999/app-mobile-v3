@@ -9,7 +9,7 @@ import 'package:tvapp/core/domain/entities/tools/diagnostico.dart';
 import 'package:tvapp/ui/providers/tools/dispositivos_providers.dart';
 import 'package:tvapp/ui/providers/tools/fibra_providers.dart';
 import 'package:tvapp/ui/providers/tools/diagnostico_providers.dart';
-import 'package:tvapp/ui/screens/menu/menu_grid.screen.dart';
+import 'package:tvapp/ui/screens/main/main.screen.dart';
 import 'package:tvapp/ui/screens/tools/wifi_password/wifi_password_screen.dart';
 import 'package:tvapp/ui/screens/tools/asistencia/asistencia_loading_screen.dart';
 import 'package:tvapp/ui/screens/tools/chat/chat_screen.dart';
@@ -30,6 +30,7 @@ class CheckHealthScreen extends ConsumerWidget {
     final dispositivosAsync = ref.watch(dispositivosProvider);
     final historialAsync = ref.watch(historialDiagnosticoProvider);
     final fibraAsync = ref.watch(fibraProvider);
+    // Sin fallback: si la API no responde, la tarjeta debe reflejar "sin conexión".
     final ssid = ref.watch(wifiSsidProvider).maybeWhen(data: (s) => s, orElse: () => null);
 
     final deviceCount = dispositivosAsync.maybeWhen(data: (d) => d.length, orElse: () => 0);
@@ -46,7 +47,7 @@ class CheckHealthScreen extends ConsumerWidget {
         scrolledUnderElevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => context.canPop() ? context.pop() : context.goNamed(MenuGridScreen.name),
+          onPressed: () => context.canPop() ? context.pop() : context.goNamed(MainScreen.name),
         ),
         title: const Text(
           'Check Health',
@@ -141,7 +142,7 @@ class _WifiStatusCard extends StatelessWidget {
             : 'Sin internet';
 
     final localSsid = ssid;
-    final subtitulo = (localSsid != null && localSsid.isNotEmpty) ? localSsid : '--';
+    final subtitulo = (localSsid != null && localSsid.isNotEmpty) ? localSsid : 'Sin conexión';
 
     return InkWell(
       onTap: () => context.pushNamed(WifiPasswordScreen.name, extra: ssid ?? ''),
@@ -257,21 +258,29 @@ class _MetricsGrid extends StatelessWidget {
 
   const _MetricsGrid({this.ultimo, required this.deviceCount});
 
+  // Mismos colores/umbrales que diagnostico_result_screen.dart e historial_screen.dart.
+  Color _colorResultado(String r) {
+    if (r.contains('EXCELENTE')) return const Color(0xFF00D285);
+    if (r.contains('BUENO')) return const Color(0xFF8BC34A);
+    if (r.contains('REGULAR')) return const Color(0xFFFFA726);
+    if (r.isEmpty) return AppColors.containerDark;
+    return const Color(0xFFF44336);
+  }
+
   @override
   Widget build(BuildContext context) {
     final velocidad = ultimo?.velocidadBajadaMbps;
     final latenciaIsp = ultimo?.latenciaIspMs;
     final latenciaGoogle = ultimo?.latenciaGoogleMs;
     final resultado = ultimo?.resultado ?? '';
-    final isExito = resultado.startsWith('EXCELENTE');
 
     return Row(
       children: [
         Expanded(child: _MetricItem(
           svgAsset: AppAssets.toolsCheckSquare,
-          label: isExito ? 'Excelente' : resultado.isNotEmpty ? resultado : 'Activo',
+          label: resultado.isNotEmpty ? resultado : 'Activo',
           subLabel: 'Estado',
-          color: isExito ? AppColors.success : AppColors.containerDark,
+          color: _colorResultado(resultado),
         )),
         Expanded(child: _MetricItem(
           svgAsset: AppAssets.toolsDevices,

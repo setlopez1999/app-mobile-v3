@@ -10,17 +10,17 @@ import 'package:tvapp/ui/shared/constants/app_assets.dart';
 
 /// Pantalla principal post-login.
 /// Grid de servicios: Eventos, IPTV, VOD, Cámaras, Club de descuentos, Check Health.
-class MenuGridScreen extends ConsumerStatefulWidget {
-  const MenuGridScreen({super.key});
+class MainScreen extends ConsumerStatefulWidget {
+  const MainScreen({super.key});
 
-  static const String name = 'Menu Grid';
-  static const String path = '/menu';
+  static const String name = 'Main';
+  static const String path = '/main';
 
   @override
-  ConsumerState<MenuGridScreen> createState() => _MenuGridScreenState();
+  ConsumerState<MainScreen> createState() => _MainScreenState();
 }
 
-class _MenuGridScreenState extends ConsumerState<MenuGridScreen> {
+class _MainScreenState extends ConsumerState<MainScreen> {
   int _currentBannerIndex = 0;
   final PageController _bannerController = PageController();
 

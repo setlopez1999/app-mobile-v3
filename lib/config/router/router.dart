@@ -27,7 +27,7 @@ import 'package:tvapp/ui/screens/register/register.screen.dart';
 import 'package:tvapp/ui/screens/search/search.screen.dart';
 import 'package:tvapp/ui/screens/terms_and_conditions/terms_and_conditions.screen.dart';
 
-import 'package:tvapp/ui/screens/menu/menu_grid.screen.dart';
+import 'package:tvapp/ui/screens/main/main.screen.dart';
 import 'package:tvapp/ui/screens/tools/check_health/check_health_screen.dart';
 import 'package:tvapp/ui/screens/tools/diagnostico/diagnostico_screen.dart';
 import 'package:tvapp/ui/screens/tools/diagnostico/diagnostico_result_screen.dart';
@@ -221,11 +221,11 @@ GoRouter appRouter(Ref ref) {
       ),
 
 
-      /// Menu Grid - Hub post-login
+      /// Main - Hub post-login
       GoRoute(
-        path: MenuGridScreen.path,
-        name: MenuGridScreen.name,
-        builder: (_, __) => const MenuGridScreen(),
+        path: MainScreen.path,
+        name: MainScreen.name,
+        builder: (_, __) => const MainScreen(),
         pageBuilder: GoTransitions.cupertino,
       ),
       /// Tools: Check Health

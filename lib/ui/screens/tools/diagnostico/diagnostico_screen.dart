@@ -52,20 +52,57 @@ class _DiagnosticoScreenState extends ConsumerState<DiagnosticoScreen> {
 
   // ── Subtítulos ────────────────────────────────────────────────────────────
 
-  String _subtitleGoogle(DiagnosticoState s) {
-    if (s.calidadGoogle == ItemCalidad.cargando) return 'Midiendo latencia...';
-    if (s.calidadGoogle == ItemCalidad.pendiente) return 'Esperando...';
-    if (s.calidadGoogle == ItemCalidad.fallido) return 'Sin acceso a internet';
-    if (s.calidadGoogle == ItemCalidad.malo) return 'Alta latencia: ${s.latenciaGoogleMs} ms';
-    return '${s.latenciaGoogleMs} ms · Google';
+  /// Peor de las dos calidades — determina el color de la tarjeta combinada.
+  ItemCalidad _peorCalidad(ItemCalidad a, ItemCalidad b) {
+    const orden = {
+      ItemCalidad.fallido: 0,
+      ItemCalidad.malo: 1,
+      ItemCalidad.regular: 2,
+      ItemCalidad.cargando: 3,
+      ItemCalidad.pendiente: 3,
+      ItemCalidad.bueno: 4,
+    };
+    return orden[a]! <= orden[b]! ? a : b;
   }
 
-  String _subtitleIsp(DiagnosticoState s) {
-    if (s.calidadIsp == ItemCalidad.cargando) return 'Analizando red...';
-    if (s.calidadIsp == ItemCalidad.pendiente) return 'Esperando...';
-    if (s.calidadIsp == ItemCalidad.fallido) return 'Sin respuesta del servidor';
-    if (s.calidadIsp == ItemCalidad.malo) return 'Alta latencia: ${s.latenciaIspMs} ms';
-    return '${s.latenciaIspMs} ms';
+  String _subtitleLatencia(DiagnosticoState s) {
+    final peor = _peorCalidad(s.calidadGoogle, s.calidadIsp);
+    if (peor == ItemCalidad.cargando) return 'Midiendo latencia...';
+    if (peor == ItemCalidad.pendiente) return 'Esperando...';
+    if (s.calidadGoogle == ItemCalidad.fallido && s.calidadIsp == ItemCalidad.fallido) {
+      return 'Sin acceso a internet';
+    }
+    final g = s.latenciaGoogleMs != null ? '${s.latenciaGoogleMs} ms' : '--';
+    final i = s.latenciaIspMs != null ? '${s.latenciaIspMs} ms' : '--';
+    return 'Google: $g  ·  ISP: $i';
+  }
+
+  /// Se resuelve solo cuando llega el dato real, pero muestra "cargando" desde
+  /// el inicio (aunque su paso real todavía no arrancó) para dar la impresión
+  /// de que las 4 tarjetas trabajan al mismo tiempo.
+  ItemCalidad _calidadWifiSenal(DiagnosticoState s) {
+    if (s.step == DiagnosticoStep.completado) {
+      final dbm = s.wifiSenialDbm;
+      if (dbm == null) return ItemCalidad.fallido;
+      if (dbm >= -60) return ItemCalidad.bueno;
+      if (dbm >= -70) return ItemCalidad.regular;
+      return ItemCalidad.malo;
+    }
+    final dbm = s.wifiSenialDbm;
+    if (dbm == null) return ItemCalidad.cargando;
+    if (dbm >= -60) return ItemCalidad.bueno;
+    if (dbm >= -70) return ItemCalidad.regular;
+    return ItemCalidad.malo;
+  }
+
+  String _subtitleWifi(DiagnosticoState s) {
+    final calidad = _calidadWifiSenal(s);
+    if (calidad == ItemCalidad.cargando) return 'Escaneando WiFi...';
+    if (calidad == ItemCalidad.pendiente) return 'Esperando...';
+    if (calidad == ItemCalidad.fallido) return 'Sin datos de señal';
+    final dbm = s.wifiSenialDbm != null ? '${s.wifiSenialDbm} dBm' : '--';
+    final banda = s.wifiBanda ?? '--';
+    return '$dbm  ·  $banda';
   }
 
   String _subtitleVelocidad(DiagnosticoState s) {
@@ -125,9 +162,9 @@ class _DiagnosticoScreenState extends ConsumerState<DiagnosticoScreen> {
             ),
             const SizedBox(height: 15),
             _DiagnosticoStatusItem(
-              title: 'Red WiFi Doméstica',
-              subtitle: _subtitleIsp(state),
-              calidad: state.calidadIsp,
+              title: 'Red WiFi',
+              subtitle: _subtitleWifi(state),
+              calidad: _calidadWifiSenal(state),
             ),
             const SizedBox(height: 15),
             _DiagnosticoStatusItem(
@@ -138,8 +175,8 @@ class _DiagnosticoScreenState extends ConsumerState<DiagnosticoScreen> {
             const SizedBox(height: 15),
             _DiagnosticoStatusItem(
               title: 'Latencia y estabilidad',
-              subtitle: _subtitleGoogle(state),
-              calidad: state.calidadGoogle,
+              subtitle: _subtitleLatencia(state),
+              calidad: _peorCalidad(state.calidadGoogle, state.calidadIsp),
             ),
             const Spacer(),
             _CancelButton(onTap: () => context.pop()),

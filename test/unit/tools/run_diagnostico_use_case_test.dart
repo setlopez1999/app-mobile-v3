@@ -5,6 +5,7 @@ import 'package:tvapp/core/domain/entities/tools/fibra.dart';
 import 'package:tvapp/core/domain/entities/tools/wifi_info.dart';
 import 'package:tvapp/core/infraestructure/repositories/tools/diagnostico_repository.dart';
 import 'package:tvapp/core/infraestructure/repositories/tools/fibra_repository.dart';
+import 'package:tvapp/core/infraestructure/repositories/tools/wifi_repository.dart';
 import 'package:tvapp/core/services/local_device_service.dart';
 import 'package:tvapp/core/services/tools/network_analyzer_service.dart';
 
@@ -27,6 +28,10 @@ class _FakeNetworkService implements NetworkAnalyzerService {
 
   @override
   Future<PingResult> ping(String host, {int count = 4}) async =>
+      PingResult(avgPing: avgPingMs, lossPercent: 0, jitter: 1, success: true);
+
+  @override
+  Future<PingResult> checkHttpLatency(String url, {int attempts = 3}) async =>
       PingResult(avgPing: avgPingMs, lossPercent: 0, jitter: 1, success: true);
 
   @override
@@ -77,6 +82,25 @@ class _FakeFibraRepo implements FibraRepository {
       const Fibra(potenciaDbm: '-18.0', estado: 'OK');
 }
 
+class _FakeWifiRepository implements WifiRepository {
+  @override
+  Future<void> cambiarNombre(String nuevoNombre) async {}
+
+  @override
+  Future<void> cambiarPassword(String nuevaPassword) async {}
+
+  @override
+  Future<String?> getSsid() async => 'TestNet';
+
+  @override
+  Future<WifiInfo> getWifiStatus() async => const WifiInfo(
+        ssid: 'TestNet',
+        signalStrengthDbm: -55,
+        bandOverride: '5GHz',
+        signalQualityOverride: 'Buena',
+      );
+}
+
 // ── Input de prueba ───────────────────────────────────────────────────────────
 
 const _testInput = RunDiagnosticoInput(
@@ -98,6 +122,7 @@ void main() {
         localDeviceService: _FakeLocalDeviceService(),
         diagnosticoRepo: _FakeDiagnosticoRepo(),
         fibraRepo: _FakeFibraRepo(),
+        wifiRepo: _FakeWifiRepository(),
       );
     });
 
@@ -114,6 +139,7 @@ void main() {
         localDeviceService: _FakeLocalDeviceService(),
         diagnosticoRepo: _FakeDiagnosticoRepo(),
         fibraRepo: _FakeFibraRepo(),
+        wifiRepo: _FakeWifiRepository(),
       );
 
       final result = await useCase.execute(_testInput);
@@ -128,6 +154,7 @@ void main() {
         localDeviceService: _FakeLocalDeviceService(),
         diagnosticoRepo: _FakeDiagnosticoRepo(resultado: 'REGULAR'),
         fibraRepo: _FakeFibraRepo(),
+        wifiRepo: _FakeWifiRepository(),
       );
 
       final result = await useCase.execute(_testInput);
@@ -140,8 +167,9 @@ void main() {
 
       expect(result.wifiSsid, equals('TestNet'));
       expect(result.wifiSenialDbm, equals(-55));
-      expect(result.wifiBanda, equals('5 GHz'));
-      expect(result.wifiGateway, equals('192.168.1.1'));
+      expect(result.wifiBanda, equals('5GHz'));
+      // La API de wifi/ssid no provee gateway — solo lo daría el sensor nativo del dispositivo.
+      expect(result.wifiGateway, isNull);
     });
 
     test('datos de fibra se transfieren al resultado', () async {
@@ -173,19 +201,21 @@ void main() {
       expect(() => useCase.execute(_testInput), returnsNormally);
     });
 
-    test('propagates exception cuando el repositorio falla', () async {
+    test('cuando el repositorio falla, cae al resultado local en vez de lanzar', () async {
       final failingRepo = _ThrowingDiagnosticoRepo();
       useCase = RunDiagnosticoUseCase(
         networkService: _FakeNetworkService(),
         localDeviceService: _FakeLocalDeviceService(),
         diagnosticoRepo: failingRepo,
         fibraRepo: _FakeFibraRepo(),
+        wifiRepo: _FakeWifiRepository(),
       );
 
-      expect(
-        () => useCase.execute(_testInput),
-        throwsA(isA<Exception>()),
-      );
+      // avgPingMs=20 (<250) para Google e ISP, y 80 Mbps (>10) de bajada
+      // cumplen los 3 criterios de _resultadoLocal -> EXCELENTE.
+      final result = await useCase.execute(_testInput);
+
+      expect(result.resultado, equals('EXCELENTE'));
     });
   });
 }

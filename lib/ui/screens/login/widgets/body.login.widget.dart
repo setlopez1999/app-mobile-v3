@@ -9,7 +9,7 @@ import 'package:tvapp/core/providers/repository_providers.dart';
 import 'package:tvapp/ui/providers/auth/auth_provider.dart';
 import 'package:tvapp/ui/screens/change_password/change_password_screen.dart';
 import 'package:tvapp/ui/screens/home/home.screen.dart';
-import 'package:tvapp/ui/screens/menu/menu_grid.screen.dart';
+import 'package:tvapp/ui/screens/main/main.screen.dart';
 import 'package:tvapp/ui/screens/register/register.screen.dart';
 import 'package:tvapp/ui/shared/widgets/global_text.widget.dart';
 import 'package:tvapp/ui/shared/widgets/google_text.widget.dart';
@@ -209,7 +209,7 @@ class _BodyWidgetState extends ConsumerState<BodyWidget> {
                                       }
 
                                       ref.read(authProvider.notifier).saveSession(userController.text);
-                                      context.pushReplacementNamed(MenuGridScreen.name);
+                                      context.pushReplacementNamed(MainScreen.name);
                                     },
                                     orElse: () {},
                                   );

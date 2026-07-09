@@ -64,20 +64,20 @@ class _DiagnosticoItem extends StatelessWidget {
 
   const _DiagnosticoItem({required this.item});
 
+  // Mismos colores/umbrales que diagnostico_result_screen.dart — un solo
+  // resultado ('resultado'), pintado igual en cualquier pantalla que lo muestre.
   Color get _colorResultado {
-    switch (item.resultado) {
-      case 'EXCELENTE': return AppColors.success;
-      case 'BUENO':     return AppColors.warning;
-      default:          return AppColors.error;
-    }
+    if (item.resultado.contains('EXCELENTE')) return const Color(0xFF00D285);
+    if (item.resultado.contains('BUENO')) return const Color(0xFF8BC34A);
+    if (item.resultado.contains('REGULAR')) return const Color(0xFFFFA726);
+    return const Color(0xFFF44336);
   }
 
   IconData get _iconResultado {
-    switch (item.resultado) {
-      case 'EXCELENTE': return Icons.check_circle;
-      case 'BUENO':     return Icons.warning_amber_rounded;
-      default:          return Icons.cancel;
-    }
+    if (item.resultado.contains('EXCELENTE')) return Icons.check_circle;
+    if (item.resultado.contains('BUENO')) return Icons.check_circle;
+    if (item.resultado.contains('REGULAR')) return Icons.warning_amber_rounded;
+    return Icons.cancel;
   }
 
   String get _fechaRelativa {
